@@ -13,8 +13,8 @@ from convmc import to_var, UnfoldedNet3dC_admm, UnfoldedNet2dC_convmc
 
 # Defining a function which sets up the default state of the parameters before training
 def get_default_param(hyper_param_net, gpu = True):
+    params_net = {}
     if hyper_param_net['Model'] == 'ADMM-Net':
-        params_net = {}
         params_net['layers'] = 5
         
         params_net['initial_neta'] = 1.81    # fixed
@@ -32,9 +32,7 @@ def get_default_param(hyper_param_net, gpu = True):
         params_net['size1'] = 49
         params_net['size2'] = 60
     
-      return params_net
     else:
-        params_net = {}
         params_net['layers'] = 5 #1 #2 #3 #4 #5 #6 #7 #8 #9 #10
         params_net['kernel'] = [(3, 1)] * 3 + [(3, 1)] * 7
         params_net['initial_mu_inverse'] = 0.0
@@ -48,8 +46,7 @@ def get_default_param(hyper_param_net, gpu = True):
         params_net['size1'] = 49
         params_net['size2'] = 60
         
-        return params_net
-
+    return params_net
 
 def get_hyperparameter_grid(Model, TrainInstances, ValInstances, BatchSize, ValBatchSize, Alpha, num_epochs, learning_rate):
   hyper_param = {}
