@@ -48,33 +48,50 @@ def get_hyperparameter_grid(Model, TrainInstances, ValInstances, BatchSize, ValB
   return hyper_param
 
 # Defining a fucntion for loading/instantiating the model based on some boolean values and updates log
-def get_model(params_net, log, path_whole = None, path_dict = None, loadmodel = False, load_frm = None):
+def get_model(params_net, hyper_param_net, log, path_whole = None, path_dict = None, loadmodel = False, load_frm = None):
     # Construct Model
     print('Configuring Network...\n')
     log.write('Configuring network...\n')
 
     if not loadmodel:
-      print('Instantiating Model...\n')
-      log.write('Instantiating Model...\n')
-      net = UnfoldedNet3dC(params_net)
-      print('Model Instantiated...\n')
-      log.write('Model Instantiated...\n')
+        print('Instantiating Model...\n')
+        log.write('Instantiating Model...\n')
+        if hyper_param_net['Model'] == 'ConvMC-Net':
+            net = UnfoldedNet2dC_convmc(params_net)
+            print('Model Instantiated...\n')
+            log.write('Model Instantiated...\n')
+        else:
+            net = UnfoldedNet3dC_admm(params_net)
+            print('Model Instantiated...\n')
+            log.write('Model Instantiated...\n')
 
     else:
         print('Loading Model...\n')
         log.write('Loading Model...\n')
-        if load_frm == 'state_dict':
-          net = UnfoldedNet3dC(params_net)
-          state_dict = torch.load(path_dict, map_location = 'cpu')
-          net.load_state_dict(state_dict)
-          print('Model loaded from state dict...\n')
-          log.write('Model loaded from state dict...\n')
-        elif load_frm == 'whole_model':
-          net = torch.load(path_whole)
-          print('Whole model loaded...\n')
-          log.write('Whole model loaded...\n')
-        net.eval()
-
+        if hyper_param_net['Model'] == 'ConvMC-Net':
+            if load_frm == 'state_dict':
+                net = UnfoldedNet2dC_convmc(params_net)
+                state_dict = torch.load(path_dict, map_location = 'cpu')
+                net.load_state_dict(state_dict)
+                print('Model loaded from state dict...\n')
+                log.write('Model loaded from state dict...\n')
+            elif load_frm == 'whole_model':
+                net = torch.load(path_whole)
+                print('Whole model loaded...\n')
+                log.write('Whole model loaded...\n')
+            net.eval()
+        else:
+            if load_frm == 'state_dict':
+                net = UnfoldedNet3dC_admm(params_net)
+                state_dict = torch.load(path_dict, map_location = 'cpu')
+                net.load_state_dict(state_dict)
+                print('Model loaded from state dict...\n')
+                log.write('Model loaded from state dict...\n')
+            elif load_frm == 'whole_model':
+                net = torch.load(path_whole)
+                print('Whole model loaded...\n')
+                log.write('Whole model loaded...\n')
+            net.eval()
     net = net.cuda()
 
     return net
