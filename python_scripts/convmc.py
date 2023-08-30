@@ -95,7 +95,7 @@ class ISTACell_admm(nn.Module):
 
 class UnfoldedNet3dC_admm(nn.Module):
     def __init__(self, params = None):
-        super(UnfoldedNet3dC, self).__init__()
+        super(UnfoldedNet3dC_admm, self).__init__()
 
 
         # Constructor initializes various parameters from the given parameter dictionary
@@ -184,7 +184,7 @@ class UnfoldedNet3dC_admm(nn.Module):
 
 class UnfoldedNet2dC_convmc(nn.Module):
     def __init__(self, params = None):
-        super(UnfoldedNet2dC_admm, self).__init__()
+        super(UnfoldedNet2dC_convmc, self).__init__()
 
         # Note: Constants that dont change througout the layers i.e. coef_mu_inverse and those that change are initalized to shape (num_layers, ) and are leanable like y1
 
@@ -217,7 +217,7 @@ class UnfoldedNet2dC_convmc(nn.Module):
         filt = []
         print(self.layers)
         for i in range(self.layers):
-            filt.append(ISTACell_admm(i, self.kernel[i], self.mu_inverse[i], self.coef_mu_inverse, self.CalInGPU))
+            filt.append(ISTACell_convmc(i, self.kernel[i], self.mu_inverse[i], self.coef_mu_inverse, self.CalInGPU))
         return nn.Sequential(*filt)
 
     # The Forward Pass recieves inputs as a list i.e. model([inputs1])
