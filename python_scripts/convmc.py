@@ -93,7 +93,7 @@ class ISTACell_admm(nn.Module):
         y = (U * stmp) @ VS.t()
         return y
 
-class UnfoldedNet3dC(nn.Module):
+class UnfoldedNet3dC_admm(nn.Module):
     def __init__(self, params = None):
         super(UnfoldedNet3dC, self).__init__()
 
@@ -182,7 +182,7 @@ class UnfoldedNet3dC(nn.Module):
           exp_tau = exp_tau.detach().numpy()
         return neta, v, lamda1,lamda2, S, coef_gamma, exp_tau
 
-class UnfoldedNet2dC_admm(nn.Module):
+class UnfoldedNet2dC_convmc(nn.Module):
     def __init__(self, params = None):
         super(UnfoldedNet2dC_admm, self).__init__()
 
@@ -381,72 +381,3 @@ class ISTACell_convmc(nn.Module):
         # Step 8: Update index 1 of data with the updated L and then pass the mask, data, and updated lagrange multiplier to the second layer/second ISTA cell as a list
         data[1] = L.view(H, U)
         return [data, entries_mask, y1tmp]
-
-class UnfoldedNet2dC_convmc(nn.Module):
-    def __init__(self, params = None):
-        super(UnfoldedNet2dC_convmc, self).__init__()
-
-        # Note: Constants that dont change througout the layers i.e. coef_mu_inverse and those that change are initalized to shape (num_layers, ) and are leanable like y1
-
-        self.layers = params['layers']
-        self.kernel = params['kernel']
-        self.CalInGPU = params['CalInGPU']
-        self.coef_mu_inverse = to_var(torch.tensor(params['coef_mu_inverse'], dtype = torch.float), self.CalInGPU)
-
-        self.mu_inverse = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_mu_inverse'], self.CalInGPU) # tensor([0., 0., 0., 0., 0.], device='cuda:0')
-
-        self.y1 = nn.Parameter(to_var(torch.ones((params['size1'], params['size2']), requires_grad = True) * params['initial_y1'], self.CalInGPU)) # A (49, 60) shape tensor with each (i, j) index containing
-                                                                                                                                                   # initial value of y1 = 0.8
-        # Get W and B matrices and pass it to the ISTA cell
-
-        # input_channels = 1
-        # output_channels = 1  # Use 1 for W and 1 for B
-        # model = LearnableMatrices(input_channels, output_channels)
-
-        # W, B = model(y1)
-
-
-
-        self.sig = nn.Sigmoid()
-        self.relu = nn.ReLU()
-        self.filter = self.makelayers()
-
-    # For each of the layers in the unfolded nn, we create ISTA cell block with the kernel, mu_inverse, reosy1,....., all of the parameters. And then combine all layers (5 in our case) using
-    # nn.Sequential forming the overall architecture
-    def makelayers(self):
-        filt = []
-        print(self.layers)
-        for i in range(self.layers):
-            filt.append(ISTACell_convmc(i, self.kernel[i], self.mu_inverse[i], self.coef_mu_inverse, self.CalInGPU))
-        return nn.Sequential(*filt)
-
-    # The Forward Pass recieves inputs as a list i.e. model([inputs1])
-    def forward(self, x):
-        data = to_var(torch.zeros([2] + list(x[0].shape)), self.CalInGPU)
-        data[0] = x[0]
-        # The data matrix is x[0]
-        H, U = x[0].shape
-
-        entries_mask = ~(torch.isnan(data[0]))
-
-        ans = self.filter([data, entries_mask, self.y1])
-        data = ans[0]
-        return ans
-
-    def getexp_LS(self):
-        mu_inverse = self.mu_inverse
-        y1 = self.y1
-        coef_mu_inverse = self.coef_mu_inverse
-        exp_L = self.sig(self.mu_inverse) * coef_mu_inverse
-
-        if torch.cuda.is_available():
-          mu_inverse = mu_inverse.cpu().detach().numpy()
-          y1 = y1.cpu().detach().numpy()
-          coef_mu_inverse = coef_mu_inverse.cpu().detach().numpy()
-          exp_L = exp_L.cpu().detach().numpy()
-        else:
-          mu_inverse = mu_inverse.detach().numpy()
-          y1 = y1.detach().numpy()
-          coef_mu_inverse = coef_mu_inverse.detach().numpy()
-          exp_L = exp_L.detach().numpy()
-        return mu_inverse, y1, exp_L
