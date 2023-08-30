@@ -9,7 +9,7 @@ except ImportError:
     sys.path.append('py_scripts')
     import convmc
 
-from convmc import to_var, UnfoldedNet3dC
+from convmc import to_var, UnfoldedNet3dC_admm, UnfoldedNet2dC
 
 # Defining a function which sets up the default state of the parameters before training
 def get_default_param(gpu = True):
