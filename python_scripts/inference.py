@@ -1,12 +1,25 @@
-from convmc import to_var, UnfoldedNet2dC_convmc
-from dataset_processing import ImageDataset
-from logs_and_results import get_current_time, get_noise_str, get_q_str, make_predictions_dir
 import numpy as np
+import subprocess
+import sys
 import os
 import shutil
 import torch
 import torch.utils.data as data
 from torch import nn
+
+try:
+    import convmc, dataset_processing, logs_and_results, training
+except ImportError:
+    print("[INFO] Cloning the repository and importing convmc & dataset_preprocessing script...")
+    subprocess.run(["git", "clone", "https://github.com/TalhaAhmed2000/convmc-net.git"])
+    subprocess.run(["mv", "convmc-net/python_scripts", "py_scripts"])
+    sys.path.append('py_scripts')
+    import convmc, dataset_preprocessing, logs_and_results, teaining
+
+
+from convmc import to_var, UnfoldedNet2dC_convmc
+from dataset_processing import ImageDataset
+from logs_and_results import get_current_time, get_noise_str, get_q_str, make_predictions_dir
 from training import get_default_param, get_hyperparameter_grid, get_model, train_step, test_step
 
 ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SPROJ-ConvMC-Net/Sensor Data'
