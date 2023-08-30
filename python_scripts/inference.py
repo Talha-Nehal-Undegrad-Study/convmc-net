@@ -14,7 +14,7 @@ except ImportError:
     subprocess.run(["git", "clone", "https://github.com/TalhaAhmed2000/convmc-net.git"])
     subprocess.run(["mv", "convmc-net/python_scripts", "py_scripts"])
     sys.path.append('py_scripts')
-    import convmc, dataset_preprocessing, logs_and_results, training
+    import convmc, dataset_processing, logs_and_results, training
 
 
 from convmc import to_var, UnfoldedNet2dC_convmc, UnfoldedNet3dC_admm
