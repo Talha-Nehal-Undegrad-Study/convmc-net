@@ -12,7 +12,7 @@ except ImportError:
 from convmc import to_var, UnfoldedNet3dC_admm, UnfoldedNet2dC_convmc
 
 # Defining a function which sets up the default state of the parameters before training
-def get_default_param(gpu = True, hyper_param_net):
+def get_default_param(gpu = True, hyper_param_net = {}):
     if hyper_param_net['Model'] == 'ADMM-Net':
         params_net = {}
         params_net['layers'] = 5
