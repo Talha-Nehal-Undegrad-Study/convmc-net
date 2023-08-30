@@ -17,7 +17,7 @@ except ImportError:
     import convmc, dataset_preprocessing, logs_and_results, teaining
 
 
-from convmc import to_var, UnfoldedNet2dC_convmc
+from convmc import to_var, UnfoldedNet2dC_convmc, UnfoldedNet3dC_admm
 from dataset_processing import ImageDataset
 from logs_and_results import get_current_time, get_noise_str, get_q_str, make_predictions_dir
 from training import get_default_param, get_hyperparameter_grid, get_model, train_step, test_step
