@@ -1,6 +1,7 @@
 import datetime
 import os
 import time
+import matplotlib.pyplot as plt
 
 ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SPROJ-ConvMC-Net/Sensor Data'
 TRY = '1st try'
@@ -87,3 +88,17 @@ def get_modularized_record(project_name, q, sigma, new_entry, hyper_param_net, p
   else:
     model_path = (f'{dir}/{project_name} Layers_{params_net["layers"]}_Alpha_{hyper_param_net["Alpha"]:.2f}_TrainInstances_{hyper_param_net["TrainInstances"]}_Epochs_[{current_epoch}_out_of_{hyper_param_net["Epochs"]}]_lr_{hyper_param_net["Lr"]}.pth')
     return model_path
+
+def plot_and_save_mse_vs_epoch(epochs_vec, lossmean_vec, hyper_param_net, lossmean_val_vec, dir, current_epoch):
+  fig = plt.figure(figsize = (8, 6), dpi = 100)
+  epochs_vec = np.arange(0, hyper_param_net['Epochs'], 1)
+  plt.plot(epochs_vec[current_epoch - 5: current_epoch], lossmean_vec[current_epoch - 5: current_epoch], '-*', label = 'loss')
+  plt.plot(epochs_vec[current_epoch - 5: current_epoch], lossmean_val_vec[current_epoch - 5: current_epoch], '-*', label = 'loss_val')
+  plt.xlabel('Epoch')
+  plt.ylabel('Loss')
+  plt.ylim(ymin = 0)
+  plt.title("MSE")
+  plt.legend()
+  plt.grid(True)
+
+  plt.savefig(dir)
