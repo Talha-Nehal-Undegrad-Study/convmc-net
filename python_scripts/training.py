@@ -1,4 +1,14 @@
 import torch
+
+try:
+    import convmc
+except ImportError:
+    print("[INFO] Cloning the repository and importing convmc & dataset_preprocessing script...")
+    subprocess.run(["git", "clone", "https://github.com/TalhaAhmed2000/convmc-net.git"])
+    subprocess.run(["mv", "convmc-net/python_scripts", "py_scripts"])
+    sys.path.append('py_scripts')
+    import convmc
+
 from convmc import to_var, UnfoldedNet3dC
 
 # Defining a function which sets up the default state of the parameters before training
