@@ -79,7 +79,6 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
 # Note: This is essentially what our functions train_step and test_step are doing so we will be using those
 
 def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, param_net, hyper_param_net, device):
-    loss_tuple = evaluate_each_model(final_model_path, train_loader, val_loader, CalInGPU, params_net, hyper_param_net)
     # Get model from dict
     if hyper_param_net['Model'] == 'ConvMC-Net':
         model = UnfoldedNet2dC_convmc(param_net)
