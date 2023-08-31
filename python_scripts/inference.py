@@ -20,7 +20,7 @@ except ImportError:
 from convmc import to_var, UnfoldedNet2dC_convmc, UnfoldedNet3dC_admm
 from dataset_processing import ImageDataset
 from logs_and_results import get_current_time, get_noise_str, get_q_str, make_predictions_dir
-from training import get_default_param, get_hyperparameter_grid, get_model, train_step, test_step
+from training import get_hyperparameter_grid, get_model, train_step, test_step
 
 ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SPROJ-ConvMC-Net/Sensor Data'
 TRY = '1st try'
@@ -121,12 +121,10 @@ def find_min_train_val_loss_ratio(dict_loss):
 # Another helper function. Given a session, q, sigma, and the model, we get all the models made that session, perform inference on it and find best performing model of that session and then rename that
 # as 'best_model.....'
 
-def search_and_save_best_model(SESSION, q, sigma, model):
+def search_and_save_best_model(SESSION, params_net, q, sigma, model):
 
   # Get param and hyperparam_net
   hyper_param_net = get_hyperparameter_grid(model, TrainInstances = 400, ValInstances = 68, BatchSize = 20, ValBatchSize = 4, Alpha = 1.0, num_epochs = 40, learning_rate = 0.012)
-  params_net = get_default_param(hyper_param_net, gpu = True)
-
   CalInGPU = params_net['CalInGPU']
 
   # Get the train and the val dataloaders
