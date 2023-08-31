@@ -159,7 +159,7 @@ def search_and_save_best_model(SESSION, params_net, q, sigma, model, device):
     noise_exp = f'/Noise Variance {float(sigma)}'
     
     # Get the folder where all the model dicts are saved
-    model_path = ROOT + q_exp + noise_exp + '/Saved Models - Dict/' + model + SESSION
+    model_path = ROOT + q_exp + noise_exp + '/Saved Models - Dict/' + model + '/' + SESSION
     
     # Get all files in the folder
     all_models = os.listdir(model_path)
