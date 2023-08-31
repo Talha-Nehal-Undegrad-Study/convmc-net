@@ -23,8 +23,6 @@ from logs_and_results import get_current_time, get_noise_str, get_q_str, make_pr
 from training import get_hyperparameter_grid, get_model, train_step, test_step
 
 ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SPROJ-ConvMC-Net/Sensor Data'
-TRY = '1st try'
-SESSION = 1
 
 # Another small helper function 'get_model_from_dict' which takes a model diretory and returns a model from it
 def get_model_from_dict(model_dict_path, model_obj):
@@ -32,15 +30,15 @@ def get_model_from_dict(model_dict_path, model_obj):
   model_state_dict = torch.load(model_dict_path)
 
   # Load the state dictionary into your model
-  model_obj.load_state_dict(model_state_dict)
+  model_obj = model_obj.load_state_dict(model_state_dict)
 
   # return model
   return model_obj
 
-def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader):
+def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, SESSION):
 
     # Get train and test dir to store predictions in
-    ProjectName = TRY + ' ' + get_current_time() + ' ' + hyper_param_net['Model'] + ' ' + 'Sampling Rate: ' + get_q_str(q) + ' and Noise Variance ' + get_noise_str(sigma)
+    ProjectName = 'Best_Model_Predictions' + ' ' + get_current_time() + ' ' + hyper_param_net['Model'] + ' ' + 'Sampling Rate: ' + get_q_str(q) + ' and Noise Variance ' + get_noise_str(sigma)
     train_dir, test_dir = make_predictions_dir(ProjectName, q, sigma, 'Predictions', hyper_param_net, SESSION)
     CalInGPU = params_net['CalInGPU']
     # Get model from dict
@@ -81,26 +79,48 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
 # Note: This is essentially what our functions train_step and test_step are doing so we will be using those
 
 def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, param_net, hyper_param_net):
-  # Get model from dict
-  model = UnfoldedNet2dC_convmc(param_net)
-
-  model = get_model_from_dict(model_dict_path, model)
-
-  CalInGPU = param_net['CalInGPU']
-
-  # Set up loss and optimizer
-  floss = nn.MSELoss()
-  optimizer = torch.optim.Adam(net.parameters(), lr = hyper_param_net['Lr'])
-  scheduler2 =  torch.optim.lr_scheduler.StepLR(optimizer, step_size= 1, gamma = 0.97, verbose = True)
-
-  # Get train loss mean from train step
-  loss_mean, loss_lowrank_mean = train_step(model, train_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
-
-  # Get test loss mean from test step
-  loss_val_mean, loss_val_lowrank_mean = test_step(model, val_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
-
-  # Return the tuple of loss_lowrank_mean and loss_val_lowrank_mean
-  return (loss_lowrank_mean, loss_val_lowrank_mean)
+    loss_tuple = evaluate_each_model(final_model_path, train_loader, val_loader, CalInGPU, params_net, hyper_param_net)
+    # Get model from dict
+    if hyper_param_net['Model'] == 'ConvMC-Net':
+        model = UnfoldedNet2dC_convmc(param_net)
+    
+        model = get_model_from_dict(model_dict_path, model)
+        
+        CalInGPU = param_net['CalInGPU']
+        
+        # Set up loss and optimizer
+        floss = nn.MSELoss()
+        optimizer = torch.optim.Adam(net.parameters(), lr = hyper_param_net['Lr'])
+        scheduler2 =  torch.optim.lr_scheduler.StepLR(optimizer, step_size= 1, gamma = 0.97, verbose = True)
+        
+        # Get train loss mean from train step
+        loss_mean, loss_lowrank_mean = train_step(model, train_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
+        
+        # Get test loss mean from test step
+        loss_val_mean, loss_val_lowrank_mean = test_step(model, val_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
+        
+        # Return the tuple of loss_lowrank_mean and loss_val_lowrank_mean
+        return (loss_lowrank_mean, loss_val_lowrank_mean)
+    else:
+        model = UnfoldedNet3dC_admm(param_net)
+    
+        model = get_model_from_dict(model_dict_path, model)
+        
+        CalInGPU = param_net['CalInGPU']
+        
+        # Set up loss and optimizer
+        floss = nn.MSELoss()
+        optimizer = torch.optim.Adam(net.parameters(), lr = hyper_param_net['Lr'])
+        scheduler2 =  torch.optim.lr_scheduler.StepLR(optimizer, step_size= 1, gamma = 0.97, verbose = True)
+        
+        # Get train loss mean from train step
+        loss_mean, loss_lowrank_mean = train_step(model, train_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
+        
+        # Get test loss mean from test step
+        loss_val_mean, loss_val_lowrank_mean = test_step(model, val_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
+        
+        # Return the tuple of loss_lowrank_mean and loss_val_lowrank_mean
+        return (loss_lowrank_mean, loss_val_lowrank_mean)
 
 # Another helper function when giving a dictionary where the key's are a string (specifying the path to the model) and the value is a tuple of size 2 containing train and val_loss. The function will
 # find the index in the dictionary where the tuple has minimum ratio
@@ -163,7 +183,7 @@ def search_and_save_best_model(SESSION, params_net, q, sigma, model):
   best_model_path = (list(dict_loss.keys()))[min_ratio_index]
 
   # Finding the best performing model, we move on to storing its predictions on the train and test dataset as per our 'make_and_store_predictions' function
-  make_and_store_predictions(best_model_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader)
+  make_and_store_predictions(best_model_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, SESSION)
 
   # Once the best models predictions are stored, we move ahead with storing the model as a 'best_model' for better reference
   source_dir = os.path.dirname(best_model_path)
