@@ -76,7 +76,7 @@ def get_model(params_net, hyper_param_net, log, path_whole = None, path_dict = N
 
 # Training functions and Plotting Functions
 
-def train_step(model, dataloader, loss_fn, optimizer, log, CalInGPU, Alpha, TrainInstances, batch):
+def train_step(model, dataloader, loss_fn, optimizer, CalInGPU, Alpha, TrainInstances, batch):
   # Put model in train mode
   model.train()
 
@@ -106,7 +106,7 @@ def train_step(model, dataloader, loss_fn, optimizer, log, CalInGPU, Alpha, Trai
 
   return loss_mean, loss_lowrank_mean
 
-def test_step(model, dataloader, loss_fn, optimizer, log, CalInGPU, Alpha, ValInstances, batch):
+def test_step(model, dataloader, loss_fn, optimizer, CalInGPU, Alpha, ValInstances, batch):
 
   model.eval()
   loss_val_mean, loss_val_lowrank_mean = 0, 0
