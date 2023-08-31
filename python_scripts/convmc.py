@@ -350,7 +350,6 @@ class ISTACell_convmc(nn.Module):
         th_mu_inverse = self.sig(self.mu_inverse) * self.coef_mu_inverse
         th_W = self.W
         th_B = self.B
-        th_y1 = self.y1
 
         # Step 4: invert mask (ask shoaib bhai why)
         nan_mask =~ entries_mask
