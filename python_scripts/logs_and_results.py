@@ -5,11 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SPROJ-ConvMC-Net/Sensor Data'
-TRY = '1st try'
-SESSION = 1
 
 # Small Helper Function to modularize training loop
-
 # Short functions to get sampling rate and noise variables as strings. make_dir is a function which takes the appropriate noise and sampling rate directory and makes there a directory for either logs or
 # saved models or plots (for both convmc and admm). get_modularized_record() takes the project name, hyperparameters, q and sigma and returns its file path either that be a log file or a title for a plot
 def get_q_str(q):
@@ -41,7 +38,7 @@ def make_session(q, sigma, new_entry, hyper_param_net, session_no):
   dir = make_dir(q, sigma, new_entry, hyper_param_net)
 
   # Now make a session corresponding to whichever try is going on currently
-  session_dir = dir + '/Session 1'
+  session_dir = dir + '/' + session_no
   os.makedirs(session_dir, exist_ok = True)
 
   return session_dir
@@ -76,7 +73,7 @@ def make_predictions_dir(project_name, q, sigma, new_entry, params_net, hyper_pa
   # Return Train and Test Directories to store data in
   return train_dir, test_dir
 
-def get_modularized_record(project_name, q, sigma, new_entry, hyper_param_net, params_net, current_epoch = None):
+def get_modularized_record(project_name, q, sigma, new_entry, hyper_param_net, params_net, SESSION, current_epoch = None):
 
   # Get directory
   dir = make_session(q, sigma, new_entry, hyper_param_net, SESSION)
