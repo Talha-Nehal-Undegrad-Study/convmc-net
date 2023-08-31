@@ -136,56 +136,58 @@ def find_min_train_val_loss_ratio(dict_loss):
           min_ratio = ratio
           min_ratio_index = index
 
-  return min_ratio_index
+  return min_ratio_index, min_ratio
 
 # Another helper function. Given a session, q, sigma, and the model, we get all the models made that session, perform inference on it and find best performing model of that session and then rename that
 # as 'best_model.....'
 
 def search_and_save_best_model(SESSION, params_net, q, sigma, model):
 
-  # Get param and hyperparam_net
-  hyper_param_net = get_hyperparameter_grid(model, TrainInstances = 400, ValInstances = 68, BatchSize = 20, ValBatchSize = 4, Alpha = 1.0, num_epochs = 40, learning_rate = 0.012)
-  CalInGPU = params_net['CalInGPU']
+    # Get param and hyperparam_net
+    hyper_param_net = get_hyperparameter_grid(model, TrainInstances = 400, ValInstances = 68, BatchSize = 20, ValBatchSize = 4, Alpha = 1.0, num_epochs = 40, learning_rate = 0.012)
+    CalInGPU = params_net['CalInGPU']
+    
+    # Get the train and the val dataloaders
+    train_dataset = ImageDataset(round(hyper_param_net['TrainInstances']), (49, 60), 0, q, sigma)
+    train_loader = data.DataLoader(train_dataset,batch_size = hyper_param_net['BatchSize'], shuffle = True)
+    val_dataset = ImageDataset(round(hyper_param_net['ValInstances']), (49, 60), 1, q, sigma)
+    val_loader = data.DataLoader(val_dataset, batch_size = hyper_param_net['ValBatchSize'], shuffle = True)
+    
+    # Initalize an empty dictionary which will contain the path to all complete models run in a particular session as keys and values of tuples of size 2
+    dict_loss = {}
+    q_exp = f'/Q is {q * 100}%'
+    noise_exp = f'/Noise Variance {float(sigma)}'
+    
+    # Get the folder where all the model dicts are saved
+    model_path = ROOT + q_exp + noise_exp + '/Saved Models - Dict/' + model + SESSION
+    
+    # Get all files in the folder
+    all_models = os.listdir(model_path)
+    
+    # We want to get all models which are complete i.e. have run all 40/40 epochs
+    filter_str = '40_out_of_40'
+    complete_models_lst = [file for file in all_models if filter_str in file]
+    
+    # Now taking each model and joining it with the model_path, we will perform inference and find which gives the best ratio of val_loss to train_loss and we will declare that as the best model
+    for model_file in complete_models_lst:
+        final_model_path = os.path.join(model_path, model_file)
+        # Now get the tuple of train_loss and val_loss
+        loss_tuple = evaluate_each_model(final_model_path, train_loader, val_loader, CalInGPU, params_net, hyper_param_net)
+        # Now store this in the dictionary defined in the beginning
+        dict_loss[final_model_path] = loss_tuple
+    
+    # After performing inference on all models of a specific session and storing their results we get the path to the model which has the minimum val_loss to train_loss ratio
+    min_ratio_index, min_ratio = find_min_train_val_loss_ratio(dict_loss)
+    
+    # Get the best model path
+    best_model_path = (list(dict_loss.keys()))[min_ratio_index]
+    
+    # Finding the best performing model, we move on to storing its predictions on the train and test dataset as per our 'make_and_store_predictions' function
+    make_and_store_predictions(best_model_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, SESSION)
+    
+    # Once the best models predictions are stored, we move ahead with storing the model as a 'best_model' for better reference
+    source_dir = os.path.dirname(best_model_path)
+    saving_best_model_path = os.path.join(source_dir, 'best_model.pth')
+    shutil.copy(best_model_path, saving_best_model_path)
 
-  # Get the train and the val dataloaders
-  train_dataset = ImageDataset(round(hyper_param_net['TrainInstances']), (49, 60), 0, q, sigma)
-  train_loader = data.DataLoader(train_dataset,batch_size = hyper_param_net['BatchSize'], shuffle = True)
-  val_dataset = ImageDataset(round(hyper_param_net['ValInstances']), (49, 60), 1, q, sigma)
-  val_loader = data.DataLoader(val_dataset, batch_size = hyper_param_net['ValBatchSize'], shuffle = True)
-
-  # Initalize an empty dictionary which will contain the path to all complete models run in a particular session as keys and values of tuples of size 2
-  dict_loss = {}
-  q_exp = f'/Q is {q * 100}%'
-  noise_exp = f'/Noise Variance {float(sigma)}'
-
-  # Get the folder where all the model dicts are saved
-  model_path = ROOT + q_exp + noise_exp + '/Saved Models - Dict/' + model + SESSION
-
-  # Get all files in the folder
-  all_models = os.listdir(model_path)
-
-  # We want to get all models which are complete i.e. have run all 40/40 epochs
-  filter_str = '40_out_of_40'
-  complete_models_lst = [file for file in all_models if filter_str in file]
-
-  # Now taking each model and joining it with the model_path, we will perform inference and find which gives the best ratio of val_loss to train_loss and we will declare that as the best model
-  for model_file in complete_models_lst:
-    final_model_path = os.path.join(model_path, model_file)
-    # Now get the tuple of train_loss and val_loss
-    loss_tuple = evaluate_each_model(final_model_path, train_loader, val_loader, CalInGPU, params_net, hyper_param_net)
-    # Now store this in the dictionary defined in the beginning
-    dict_loss[final_model_path] = loss_tuple
-
-  # After performing inference on all models of a specific session and storing their results we get the path to the model which has the minimum val_loss to train_loss ratio
-  min_ratio_index = find_min_train_val_loss_ratio(dict_loss)
-
-  # Get the best model path
-  best_model_path = (list(dict_loss.keys()))[min_ratio_index]
-
-  # Finding the best performing model, we move on to storing its predictions on the train and test dataset as per our 'make_and_store_predictions' function
-  make_and_store_predictions(best_model_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, SESSION)
-
-  # Once the best models predictions are stored, we move ahead with storing the model as a 'best_model' for better reference
-  source_dir = os.path.dirname(best_model_path)
-  saving_best_model_path = os.path.join(source_dir, 'best_model.pth')
-  shutil.copy(best_model_path, saving_best_model_path)
+    return min_ratio
