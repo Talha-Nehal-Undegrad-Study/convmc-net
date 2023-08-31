@@ -129,7 +129,9 @@ def train_step(model, dataloader, loss_fn, optimizer, log, CalInGPU, Alpha, Trai
           inputs1 = to_var(D[ii], CalInGPU)
           targets_L = to_var(L[ii], CalInGPU)
           # Forward + backward + loss
+          print("FG")
           lst_1 = model([inputs1])
+          print("TG")
           outputs_L = lst_1[0][1]
           # Current loss
           loss = (Alpha * loss_fn(outputs_L, targets_L))/torch.square(torch.norm(targets_L, p = 'fro'))
