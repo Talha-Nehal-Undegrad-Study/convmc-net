@@ -25,7 +25,7 @@ from training import get_hyperparameter_grid, get_model, train_step, test_step
 ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SPROJ-ConvMC-Net/Sensor Data'
 
 # Another small helper function 'get_model_from_dict' which takes a model diretory and returns a model from it
-def get_model_from_dict(model_dict_path, model_obj):
+def get_model_from_dict(model_dict_path, model_obj, device):
   # Load the model dictionary
   model_state_dict = torch.load(model_dict_path)
 
@@ -33,9 +33,9 @@ def get_model_from_dict(model_dict_path, model_obj):
   model_obj = model_obj.load_state_dict(model_state_dict)
 
   # return model
-  return model_obj
+  return model_obj.to(device)
 
-def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, SESSION):
+def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, device, SESSION):
 
     # Get train and test dir to store predictions in
     ProjectName = 'Best_Model_Predictions' + ' ' + get_current_time() + ' ' + hyper_param_net['Model'] + ' ' + 'Sampling Rate: ' + get_q_str(q) + ' and Noise Variance ' + get_noise_str(sigma)
@@ -46,7 +46,7 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
     # Create an instance of your model class
     model = UnfoldedNet2dC_convmc(params_net)
 
-    model = get_model_from_dict(model_dict_path, model)
+    model = get_model_from_dict(model_dict_path, model, device)
 
     # Put model in eval mode
     model.eval()
@@ -78,13 +78,13 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
 # Another helper function which when given the same arguement as make_and_store_predictions except that of train and test dir, performs inference and gets the train_loss and validation_loss mean
 # Note: This is essentially what our functions train_step and test_step are doing so we will be using those
 
-def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, param_net, hyper_param_net):
+def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, param_net, hyper_param_net, device):
     loss_tuple = evaluate_each_model(final_model_path, train_loader, val_loader, CalInGPU, params_net, hyper_param_net)
     # Get model from dict
     if hyper_param_net['Model'] == 'ConvMC-Net':
         model = UnfoldedNet2dC_convmc(param_net)
     
-        model = get_model_from_dict(model_dict_path, model)
+        model = get_model_from_dict(model_dict_path, model, device)
         
         CalInGPU = param_net['CalInGPU']
         
@@ -104,7 +104,7 @@ def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, par
     else:
         model = UnfoldedNet3dC_admm(param_net)
     
-        model = get_model_from_dict(model_dict_path, model)
+        model = get_model_from_dict(model_dict_path, model, device)
         
         CalInGPU = param_net['CalInGPU']
         
@@ -141,7 +141,7 @@ def find_min_train_val_loss_ratio(dict_loss):
 # Another helper function. Given a session, q, sigma, and the model, we get all the models made that session, perform inference on it and find best performing model of that session and then rename that
 # as 'best_model.....'
 
-def search_and_save_best_model(SESSION, params_net, q, sigma, model):
+def search_and_save_best_model(SESSION, params_net, q, sigma, model, device):
 
     # Get param and hyperparam_net
     hyper_param_net = get_hyperparameter_grid(model, TrainInstances = 400, ValInstances = 68, BatchSize = 20, ValBatchSize = 4, Alpha = 1.0, num_epochs = 40, learning_rate = 0.012)
@@ -172,7 +172,7 @@ def search_and_save_best_model(SESSION, params_net, q, sigma, model):
     for model_file in complete_models_lst:
         final_model_path = os.path.join(model_path, model_file)
         # Now get the tuple of train_loss and val_loss
-        loss_tuple = evaluate_each_model(final_model_path, train_loader, val_loader, CalInGPU, params_net, hyper_param_net)
+        loss_tuple = evaluate_each_model(final_model_path, train_loader, val_loader, CalInGPU, params_net, hyper_param_net, device)
         # Now store this in the dictionary defined in the beginning
         dict_loss[final_model_path] = loss_tuple
     
@@ -183,7 +183,7 @@ def search_and_save_best_model(SESSION, params_net, q, sigma, model):
     best_model_path = (list(dict_loss.keys()))[min_ratio_index]
     
     # Finding the best performing model, we move on to storing its predictions on the train and test dataset as per our 'make_and_store_predictions' function
-    make_and_store_predictions(best_model_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, SESSION)
+    make_and_store_predictions(best_model_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, device, SESSION)
     
     # Once the best models predictions are stored, we move ahead with storing the model as a 'best_model' for better reference
     source_dir = os.path.dirname(best_model_path)
