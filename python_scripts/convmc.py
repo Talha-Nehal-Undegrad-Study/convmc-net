@@ -347,7 +347,7 @@ class ISTACell_convmc(nn.Module):
         H, U = x.shape
 
         # Step 3: Scale mu_inverse by sigmoid and coef_mu_inverse to be used later for the iterative step. Also get some parameters
-        th_mu_inverse = self.sig(mu_inverse) * self.coef_mu_inverse
+        th_mu_inverse = self.sig(self.mu_inverse) * self.coef_mu_inverse
         th_W = self.W
         th_B = self.B
         th_y1 = self.y1
