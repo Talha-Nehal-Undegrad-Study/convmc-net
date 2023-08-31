@@ -124,11 +124,10 @@ def find_min_train_val_loss_ratio(dict_loss):
 def search_and_save_best_model(SESSION, q, sigma, model):
 
   # Get param and hyperparam_net
-  params_net = get_default_param(gpu = True)
+  hyper_param_net = get_hyperparameter_grid(model, TrainInstances = 400, ValInstances = 68, BatchSize = 20, ValBatchSize = 4, Alpha = 1.0, num_epochs = 40, learning_rate = 0.012)
+  params_net = get_default_param(hyper_param_net, gpu = True)
 
   CalInGPU = params_net['CalInGPU']
-
-  hyper_param_net = get_hyperparameter_grid(model, TrainInstances = 400, ValInstances = 68, BatchSize = 20, ValBatchSize = 4, Alpha = 1.0, num_epochs = 40, learning_rate = 0.012)
 
   # Get the train and the val dataloaders
   train_dataset = ImageDataset(round(hyper_param_net['TrainInstances']), (49, 60), 0, q, sigma)
