@@ -11,43 +11,6 @@ except ImportError:
 
 from convmc import to_var, UnfoldedNet3dC_admm, UnfoldedNet2dC_convmc
 
-# Defining a function which sets up the default state of the parameters before training
-def get_default_param(hyper_param_net, gpu = True):
-    params_net = {}
-    if hyper_param_net['Model'] == 'ADMM-Net':
-        params_net['layers'] = 5
-        
-        params_net['initial_neta'] = 1.81    # fixed
-        params_net['initial_lamda1'] = 0.051 # fixed
-        params_net['initial_lamda2'] = 0.049 # fixed
-        params_net['initial_v'] = 0
-        
-        params_net['initial_S'] = 0.05001 #fixed
-        
-        params_net['initial_P'] = 0.2401 #fixed
-        
-        params_net['coef_gamma'] = 0.4001
-        
-        params_net['CalInGPU'] = gpu #whether to calculate in GPU
-        params_net['size1'] = 49
-        params_net['size2'] = 60
-    
-    else:
-        params_net['layers'] = 5 #1 #2 #3 #4 #5 #6 #7 #8 #9 #10
-        params_net['kernel'] = [(3, 1)] * 3 + [(3, 1)] * 7
-        params_net['initial_mu_inverse'] = 0.0
-        
-        params_net['initial_y1']= 0.8
-        
-        params_net['coef_mu_inverse'] = 0.36
-        
-        params_net['CalInGPU'] = gpu # whether to calculate in GPU
-        params_net['kernel'] = params_net['kernel'][0:params_net['layers']]
-        params_net['size1'] = 49
-        params_net['size2'] = 60
-        
-    return params_net
-
 def get_hyperparameter_grid(Model, TrainInstances, ValInstances, BatchSize, ValBatchSize, Alpha, num_epochs, learning_rate):
   hyper_param = {}
 
