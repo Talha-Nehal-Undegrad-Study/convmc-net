@@ -366,7 +366,6 @@ class ISTACell_convmc(nn.Module):
         Ltmp = part1_eq + part2_eq + part3_eq # shape (49, 60)
 
         # Step 6: Perform singular value thresholding on Ltemp
-        print("GG")
         L = self.svtC(Ltmp.view(H, U), th_mu_inverse)
 
         # Step 7: Update lagrange multiplier using gradient ascent
