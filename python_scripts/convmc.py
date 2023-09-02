@@ -133,8 +133,9 @@ class UnfoldedNet3dC_admm(nn.Module):
 
         # Get the dimensions i.e. H = 49, U = 60 and then intialize a mask of shape (49, 60) which is True wherever there is not a missing value in x/L
         H, U = x[0].shape
-        entries_mask = ~(torch.isnan(data[0]))
-
+        # entries_mask = ~(torch.isnan(data[0]))
+        entries_mask = (data[0] != 0)
+        
         # Intialize the temporal matrix D which is such that its of shape (U, U - 1) and fill the main diagonal with -1's and the second diagonal with 1's such that XD = [x2 - x1, x3 - x2, ...., xN - XN-1]
         D = torch.zeros((U, U - 1),device = torch.device('cuda'), requires_grad = False)
         D.fill_diagonal_(-1)
@@ -227,8 +228,9 @@ class UnfoldedNet2dC_convmc(nn.Module):
         # The data matrix is x[0]
         H, U = x[0].shape
 
-        entries_mask = ~(torch.isnan(data[0]))
-
+        # entries_mask = ~(torch.isnan(data[0]))
+        entries_mask = (data[0] != 0)
+        
         ans = self.filter([data, entries_mask, self.y1])
         data = ans[0]
         return ans
@@ -351,10 +353,7 @@ class ISTACell_convmc(nn.Module):
         th_W = self.W
         th_B = self.B
 
-        # Step 4: invert mask (ask shoaib bhai why)
-        nan_mask =~ entries_mask
-
-        # Step 5: Carry out Eq (9)
+        # Step 4: Carry out Eq (9)
         # Part 1: Performs the convolutional operation on the matrix x by replacing it with 0 where it contains missing values and then added it with L (which initially is just zeros of shape (49, 60))
         part1_eq = L + self.conv1(torch.where(entries_mask, x, torch.tensor(0.0, device = torch.device('cuda'), requires_grad = self.CalInGPU)))
         # Part 2: Performs convolutional operation on the matrix L by first replacing it with 0 where it contains missing values then added with part1
@@ -365,10 +364,10 @@ class ISTACell_convmc(nn.Module):
         # Overall result:
         Ltmp = part1_eq + part2_eq + part3_eq # shape (49, 60)
 
-        # Step 6: Perform singular value thresholding on Ltemp
+        # Step 5: Perform singular value thresholding on Ltemp
         L = self.svtC(Ltmp.view(H, U), th_mu_inverse)
 
-        # Step 7: Update lagrange multiplier using gradient ascent
+        # Step 6: Update lagrange multiplier using gradient ascent
 
         # Intialize an empty matrix same size as y1 and then assign it the current largrange multiplier
         y1tmp = torch.zeros((H, U), device = torch.device('cuda'), requires_grad = True)
@@ -377,6 +376,6 @@ class ISTACell_convmc(nn.Module):
         y1tmp = y1tmp + (1/th_mu_inverse) * (torch.where(entries_mask, x, torch.tensor(0.0, device = torch.device('cuda'), requires_grad = self.CalInGPU)) -
                                               torch.where(entries_mask, L, torch.tensor(0.0, device = torch.device('cuda'), requires_grad = self.CalInGPU)))
 
-        # Step 8: Update index 1 of data with the updated L and then pass the mask, data, and updated lagrange multiplier to the second layer/second ISTA cell as a list
+        # Step 7: Update index 1 of data with the updated L and then pass the mask, data, and updated lagrange multiplier to the second layer/second ISTA cell as a list
         data[1] = L.view(H, U)
         return [data, entries_mask, y1tmp]
