@@ -104,7 +104,7 @@ def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, par
         print("4")
         # Get test loss mean from test step
         loss_val_mean, loss_val_lowrank_mean = test_step(model, val_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
-        print("5")
+        print("5:)")
         # Return the tuple of loss_lowrank_mean and loss_val_lowrank_mean
         return (loss_lowrank_mean, loss_val_lowrank_mean)
     else:
