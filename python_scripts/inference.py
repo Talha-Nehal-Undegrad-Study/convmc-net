@@ -86,7 +86,9 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
 
 def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, param_net, hyper_param_net, device):
     # Get model from dict
+    print("000"
     if hyper_param_net['Model'] == 'ConvMC-Net':
+        print("001")
         model = UnfoldedNet2dC_convmc(param_net)
         print("1")
         model = get_model_from_dict(model_dict_path, model, device)
