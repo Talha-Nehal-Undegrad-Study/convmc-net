@@ -12,7 +12,7 @@ def to_var(X,CalInGPU):
 
 class ISTACell_admm(nn.Module):
     # Constructor initalizes all the parameters that were passed to it from the unfolded net. Note: v, neta, lamda1/2, S are different for each layer. coef_gamma is constant
-    def __init__(self, neta, v, lamda1, lamda2, S, coef_gamma, CalInGPU):
+    def __init__(self, neta, v, lamda1, lamda2, S, rho, coef_gamma, CalInGPU):
         super(ISTACell_admm,self).__init__()
 
         self.v = nn.Parameter(v)
@@ -20,6 +20,7 @@ class ISTACell_admm(nn.Module):
         self.lamda1 = nn.Parameter(lamda1)
         self.lamda2 = nn.Parameter(lamda2)
 
+        self.rho = nn.Parameter(rho)
         self.S = nn.Parameter(S)
         self.coef_gamma = coef_gamma
 
@@ -48,7 +49,7 @@ class ISTACell_admm(nn.Module):
         th_neta = self.neta
         th_lamda1 =  self.lamda1
         th_lamda2 =  self.lamda2
-        th_rho = self.rosy1
+        th_rho = self.rho
         th_S = self.S
         coef_gamma = self.coef_gamma
 
@@ -104,6 +105,7 @@ class UnfoldedNet3dC_admm(nn.Module):
 
         self.params = params
 
+        self.rho = to_var(torch.ones(self.layers, requires_grad=  True) * params['initial_rho'], self.CalInGPU)
         self.coef_gamma = to_var(torch.tensor(params['coef_gamma'], dtype = torch.float), self.CalInGPU)
         self.neta = to_var(torch.ones(self.layers, requires_grad=True) * params['initial_neta'], self.CalInGPU)
         self.v = to_var(torch.ones(self.layers, requires_grad=True) * params['initial_v'], self.CalInGPU)
@@ -122,7 +124,7 @@ class UnfoldedNet3dC_admm(nn.Module):
         print(self.layers)
         for i in range(self.layers):
           print('layer number', i)
-          filt.append(ISTACell_admm(self.neta[i], self.v[i], self.lamda1[i],self.lamda2[i], self.S[i], self.coef_gamma, self.CalInGPU))
+          filt.append(ISTACell_admm(self.neta[i], self.v[i], self.lamda1[i],self.lamda2[i], self.S[i], self.rho[i], self.coef_gamma, self.CalInGPU))
         return nn.Sequential(*filt)
 
     # Forward Pass recieves a list containing only one element for now and that is the Lowrank(denoised maybe) component
@@ -160,7 +162,8 @@ class UnfoldedNet3dC_admm(nn.Module):
 
         v = self.v
         S = self.S
-
+        rho = self.rho
+        
         coef_gamma = self.coef_gamma
         # exp_tau used for svt threshold of Z/X (eq 13 of original paper)
         exp_tau = self.sig(v) * coef_gamma
@@ -171,6 +174,7 @@ class UnfoldedNet3dC_admm(nn.Module):
           lamda1 = lamda1.cpu().detach().numpy()
           lamda2 = lamda2.cpu().detach().numpy()
           S = S.cpu().detach().numpy()
+          rho = rho.cpu().detach().numpy()
           coef_gamma = coef_gamma.cpu().detach().numpy()
           exp_tau = exp_tau.cpu().detach().numpy()
         else:
@@ -179,9 +183,10 @@ class UnfoldedNet3dC_admm(nn.Module):
           lamda1 = lamda1.detach().numpy()
           lamda2 = lamda2.detach().numpy()
           S = S.detach().numpy()
+          rho = rho.detach().numpy()
           coef_gamma = coef_gamma.detach().numpy()
           exp_tau = exp_tau.detach().numpy()
-        return neta, v, lamda1,lamda2, S, coef_gamma, exp_tau
+        return neta, v, lamda1, lamda2, S, rho, coef_gamma, exp_tau
 
 class UnfoldedNet2dC_convmc(nn.Module):
     def __init__(self, params = None):
