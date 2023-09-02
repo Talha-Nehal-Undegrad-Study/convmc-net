@@ -193,16 +193,18 @@ class UnfoldedNet2dC_convmc(nn.Module):
         super(UnfoldedNet2dC_convmc, self).__init__()
 
         # Note: Constants that dont change througout the layers i.e. coef_mu_inverse and those that change are initalized to shape (num_layers, ) and are leanable like y1
-
+        print("here1")
         self.layers = params['layers']
         self.kernel = params['kernel']
+        print("here2")
         self.CalInGPU = params['CalInGPU']
+        print("here3")
         self.coef_mu_inverse = to_var(torch.tensor(params['coef_mu_inverse'], dtype = torch.float), self.CalInGPU)
-
+        print("here4")
         self.mu_inverse = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_mu_inverse'], self.CalInGPU) # tensor([0., 0., 0., 0., 0.], device='cuda:0')
-
+        print("here5")
         self.y1 = nn.Parameter(to_var(torch.ones((params['size1'], params['size2']), requires_grad = True) * params['initial_y1'], self.CalInGPU)) # A (49, 60) shape tensor with each (i, j) index containing
-                                                                                                                                                   # initial value of y1 = 0.8
+        print("here6")                                                                                                                                   # initial value of y1 = 0.8
         # Get W and B matrices and pass it to the ISTA cell
 
         # input_channels = 1
