@@ -180,6 +180,7 @@ def search_and_save_best_model(SESSION, params_net, q, sigma, model, device):
         # Now get the tuple of train_loss and val_loss
         print("GG")
         loss_tuple = evaluate_each_model(final_model_path, train_loader, val_loader, CalInGPU, params_net, hyper_param_net, device)
+        print(loss_tuple)
         print("12")
         # Now store this in the dictionary defined in the beginning
         dict_loss[final_model_path] = loss_tuple
