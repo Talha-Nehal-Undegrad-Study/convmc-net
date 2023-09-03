@@ -27,6 +27,7 @@ ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SP
 # Another small helper function 'get_model_from_dict' which takes a model diretory and returns a model from it
 def get_model_from_dict(model_dict_path, model_obj, device):
   # Load the model dictionary
+  print("gjg")
   model_state_dict = torch.load(model_dict_path)
   print('model2')
   # Load the state dictionary into your model
