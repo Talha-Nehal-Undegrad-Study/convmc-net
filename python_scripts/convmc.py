@@ -263,7 +263,7 @@ class Conv2dC(nn.Module):
         pad0 = int((kernel[0] - 1) / 2)
         pad1 = int((kernel[1] - 1) / 2)
 
-        self.convR = nn.Conv2d(1, 1, (kernel[0], kernel[0]), (1, 1), (pad0, pad0), groups = 1).cuda()
+        self.convR = to_var(nn.Conv2d(1, 1, (kernel[0], kernel[0]), (1, 1), (pad0, pad0), groups = 1), self.CalInGPU)
         # At groups = in_channels, each input channel is convolved with its own set of filters (of size out_channels/in_channels)
 
     def forward(self, x):
