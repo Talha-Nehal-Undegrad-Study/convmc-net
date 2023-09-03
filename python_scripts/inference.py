@@ -28,10 +28,10 @@ ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SP
 def get_model_from_dict(model_dict_path, model_obj, device):
   # Load the model dictionary
   model_state_dict = torch.load(model_dict_path)
-
+  print('model2')
   # Load the state dictionary into your model
   model_obj = model_obj.load_state_dict(model_state_dict)
-
+  print('model1')
   # return model
   return model_obj.to(device)
 
