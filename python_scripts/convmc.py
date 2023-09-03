@@ -256,7 +256,7 @@ class UnfoldedNet2dC_convmc(nn.Module):
 
 # Conv2D class
 class Conv2dC(nn.Module):
-    def __init__(self, kernel, device):
+    def __init__(self, kernel):
         super(Conv2dC, self).__init__()
 
         # Given a kernel size of 2 dimensions, we calculate the padding through the formula (k[0] - 1)/2
