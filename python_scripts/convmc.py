@@ -193,18 +193,12 @@ class UnfoldedNet2dC_convmc(nn.Module):
         super(UnfoldedNet2dC_convmc, self).__init__()
 
         # Note: Constants that dont change througout the layers i.e. coef_mu_inverse and those that change are initalized to shape (num_layers, ) and are leanable like y1
-        print("here1")
         self.layers = params['layers']
         self.kernel = params['kernel']
-        print("here2")
         self.CalInGPU = params['CalInGPU']
-        print("here3")
         self.coef_mu_inverse = to_var(torch.tensor(params['coef_mu_inverse'], dtype = torch.float), self.CalInGPU)
-        print("here4")
         self.mu_inverse = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_mu_inverse'], self.CalInGPU) # tensor([0., 0., 0., 0., 0.], device='cuda:0')
-        print("here5")
         self.y1 = nn.Parameter(to_var(torch.ones((params['size1'], params['size2']), requires_grad = True) * params['initial_y1'], self.CalInGPU)) # A (49, 60) shape tensor with each (i, j) index containing
-        print("here6")                                                                                                                                   # initial value of y1 = 0.8
         # Get W and B matrices and pass it to the ISTA cell
 
         # input_channels = 1
@@ -214,18 +208,17 @@ class UnfoldedNet2dC_convmc(nn.Module):
         # W, B = model(y1)
         
         self.sig = nn.Sigmoid()
-        print("here7")
         self.relu = nn.ReLU()
-        print("here8")
         self.filter = self.makelayers()
-        print("here9")
-
+        
     # For each of the layers in the unfolded nn, we create ISTA cell block with the kernel, mu_inverse, reosy1,....., all of the parameters. And then combine all layers (5 in our case) using
     # nn.Sequential forming the overall architecture
     def makelayers(self):
+        print("make1")
         filt = []
-        print(self.layers)
+        print("make1")
         for i in range(self.layers):
+            print(f"make {i + 3}")
             filt.append(ISTACell_convmc(i, self.kernel[i], self.mu_inverse[i], self.coef_mu_inverse, self.CalInGPU))
         return nn.Sequential(*filt)
 
@@ -303,6 +296,7 @@ class LearnableMatrices(nn.Module):
         return W.squeeze(), B.squeeze()
 
 # ISTA Cell Class
+ISTACell_convmc(i, self.kernel[i], self.mu_inverse[i], self.coef_mu_inverse, self.CalInGPU)
 class ISTACell_convmc(nn.Module):
     # Constuctor initializes the parameters that have to be learnt per layer like mu_inverse and some that stay constant throughout like coef_mu_inverse
     def __init__(self, layer_num, kernel, mu_inverse, coef_mu_inverse, CalInGPU):
@@ -316,9 +310,12 @@ class ISTACell_convmc(nn.Module):
 
         self.layer_num = layer_num
 
-        self.W = nn.Parameter(torch.ones((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
-        self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
+        # self.W = nn.Parameter(torch.ones((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
+        # self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
 
+        self.W = to_var(nn.Parameter(torch.ones((49, 60), requires_grad = CalInGPU)), self.CalInGPU)
+        self.B = to_var(nn.Parameter(torch.zeros((49, 60), requires_grad = CalInGPU)), self.CalInGPU)
+        
         self.coef_mu_inverse = coef_mu_inverse
 
         self.CalInGPU = CalInGPU
