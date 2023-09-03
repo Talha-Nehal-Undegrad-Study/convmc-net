@@ -36,18 +36,14 @@ def get_model_from_dict(model_dict_path, model_obj, device):
   return model_obj.to(device)
 
 def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, device, SESSION):
-    print("7")
     # Get train and test dir to store predictions in
     ProjectName = 'Best_Model_Predictions' + ' ' + get_current_time() + ' ' + hyper_param_net['Model'] + ' ' + 'Sampling Rate: ' + get_q_str(q) + ' and Noise Variance ' + get_noise_str(sigma)
     train_dir, test_dir = make_predictions_dir(ProjectName, q, sigma, 'Predictions', hyper_param_net, SESSION)
     CalInGPU = params_net['CalInGPU']
     # Get model from dict
-    print("8")
     # Create an instance of your model class
     model = UnfoldedNet2dC_convmc(params_net)
-    print("9")
     model = get_model_from_dict(model_dict_path, model, device)
-    print("10")
     # Put model in eval mode
     model.eval()
 
@@ -55,13 +51,10 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
     with torch.inference_mode():
       for batch, (D, L) in enumerate(train_loader):
         for mat in range(batch):
-          print("20")
           # Get inputs and targets and forward pass
           inputsv1 = to_var(D[mat], CalInGPU)
           targets_Lv = to_var(L[mat], CalInGPU)
-          print("21")
           lst_2 = model([inputsv1])  # Forward
-          print("22")
           # Get predicted L and save it in the corresponding dir
           pred_L = lst_2[0][1]
           np.save(train_dir + '/pred_mat_MC_train' + str(batch) + '.npy', pred_L)
@@ -71,12 +64,9 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
       for batch, (D, L) in enumerate(val_loader):
         for mat in range(batch):
           # Get inputs and targets and forward pass
-          print("23")
           inputsv1 = to_var(D[mat], CalInGPU)
           targets_Lv = to_var(L[mat], CalInGPU)
-          print("24")
           lst_2 = model([inputsv1])  # Forward
-          print("25")
           # Get predicted L and save it in the corresponding dir
           pred_L = lst_2[0][1]
           np.save(test_dir + '/pred_mat_MC_test' + str(batch) + '.npy', pred_L)
@@ -88,11 +78,8 @@ def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, par
     # Get model from dict
     print("000")
     if hyper_param_net['Model'] == 'ConvMC-Net':
-        print("001")
         model = UnfoldedNet2dC_convmc(param_net)
-        print("1")
         model = get_model_from_dict(model_dict_path, model, device)
-        print("2")
         CalInGPU = param_net['CalInGPU']
         
         # Set up loss and optimizer
@@ -101,32 +88,24 @@ def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, par
         scheduler2 =  torch.optim.lr_scheduler.StepLR(optimizer, step_size = 1, gamma = 0.97, verbose = True)
         
         # Get train loss mean from train step
-        print("3")
         loss_mean, loss_lowrank_mean = train_step(model, train_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
-        print("4")
         # Get test loss mean from test step
         loss_val_mean, loss_val_lowrank_mean = test_step(model, val_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
-        print("5:)")
         # Return the tuple of loss_lowrank_mean and loss_val_lowrank_mean
         return (loss_lowrank_mean, loss_val_lowrank_mean)
     else:
         model = UnfoldedNet3dC_admm(param_net)
-        print("123")
         model = get_model_from_dict(model_dict_path, model, device)
-        print("124")
         CalInGPU = param_net['CalInGPU']
     
         # Set up loss and optimizer
         floss = nn.MSELoss()
         optimizer = torch.optim.Adam(net.parameters(), lr = hyper_param_net['Lr'])
         scheduler2 =  torch.optim.lr_scheduler.StepLR(optimizer, step_size= 1, gamma = 0.97, verbose = True)
-        print("125")
         # Get train loss mean from train step
         loss_mean, loss_lowrank_mean = train_step(model, train_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
-        print("126")
         # Get test loss mean from test step
         loss_val_mean, loss_val_lowrank_mean = test_step(model, val_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
-        print("127")
         # Return the tuple of loss_lowrank_mean and loss_val_lowrank_mean
         return (loss_lowrank_mean, loss_val_lowrank_mean)
 
@@ -180,10 +159,7 @@ def search_and_save_best_model(SESSION, params_net, q, sigma, model, device):
     for model_file in complete_models_lst:
         final_model_path = os.path.join(model_path, model_file)
         # Now get the tuple of train_loss and val_loss
-        print("GG")
         loss_tuple = evaluate_each_model(final_model_path, train_loader, val_loader, CalInGPU, params_net, hyper_param_net, device)
-        print(loss_tuple)
-        print("12")
         # Now store this in the dictionary defined in the beginning
         dict_loss[final_model_path] = loss_tuple
     
