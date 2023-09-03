@@ -296,7 +296,6 @@ class LearnableMatrices(nn.Module):
         return W.squeeze(), B.squeeze()
 
 # ISTA Cell Class
-ISTACell_convmc(i, self.kernel[i], self.mu_inverse[i], self.coef_mu_inverse, self.CalInGPU)
 class ISTACell_convmc(nn.Module):
     # Constuctor initializes the parameters that have to be learnt per layer like mu_inverse and some that stay constant throughout like coef_mu_inverse
     def __init__(self, layer_num, kernel, mu_inverse, coef_mu_inverse, CalInGPU):
@@ -313,8 +312,8 @@ class ISTACell_convmc(nn.Module):
         # self.W = nn.Parameter(torch.ones((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
         # self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
 
-        self.W = to_var(nn.Parameter(torch.ones((49, 60), requires_grad = CalInGPU)), self.CalInGPU)
-        self.B = to_var(nn.Parameter(torch.zeros((49, 60), requires_grad = CalInGPU)), self.CalInGPU)
+        self.W = to_var(nn.Parameter(torch.ones((49, 60), requires_grad = True)), self.CalInGPU)
+        self.B = to_var(nn.Parameter(torch.zeros((49, 60), requires_grad = True)), self.CalInGPU)
         
         self.coef_mu_inverse = coef_mu_inverse
 
