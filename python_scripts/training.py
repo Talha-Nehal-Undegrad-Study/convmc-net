@@ -76,7 +76,7 @@ def get_model(params_net, hyper_param_net, log, path_whole = None, path_dict = N
 
 # Training functions and Plotting Functions
 
-def train_step(model, dataloader, loss_fn, optimizer, CalInGPU, Alpha, TrainInstances, batch):
+def train_step(model, dataloader, loss_fn, optimizer, CalInGPU, Alpha, TrainInstances, batch, inference = False):
   # Put model in train mode
   model.train()
 
@@ -88,19 +88,21 @@ def train_step(model, dataloader, loss_fn, optimizer, CalInGPU, Alpha, TrainInst
     # set the gradients to zero at the beginning of each epoch
     optimizer.zero_grad()
     with torch.autograd.set_detect_anomaly(False):
-      for ii in range(batch):
-          inputs1 = to_var(D[ii], CalInGPU)
-          targets_L = to_var(L[ii], CalInGPU)
-          # Forward + backward + loss
-          lst_1 = model([inputs1])
-          outputs_L = lst_1[0][1]
-          # Current loss
-          loss = (Alpha * loss_fn(outputs_L, targets_L))/torch.square(torch.norm(targets_L, p = 'fro'))
-          loss_lowrank = (loss_fn(outputs_L,targets_L))/torch.square(torch.norm(targets_L, p = 'fro'))
-          loss_mean += loss.item()
-          loss_lowrank_mean += loss_lowrank.item()
+        for ii in range(batch):
+            inputs1 = to_var(D[ii], CalInGPU)
+            targets_L = to_var(L[ii], CalInGPU)
+            # Forward + backward + loss
+            lst_1 = model([inputs1])
+            outputs_L = lst_1[0][1]
+            # Current loss
+            loss = (Alpha * loss_fn(outputs_L, targets_L))/torch.square(torch.norm(targets_L, p = 'fro'))
+            loss_lowrank = (loss_fn(outputs_L,targets_L))/torch.square(torch.norm(targets_L, p = 'fro'))
+            loss_mean += loss.item()
+            loss_lowrank_mean += loss_lowrank.item()
+        if not inference:
           loss.backward()
-    optimizer.step()
+    if not inference:
+        optimizer.step()
   loss_mean = loss_mean/TrainInstances
   loss_lowrank_mean = loss_lowrank_mean/TrainInstances
 
