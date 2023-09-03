@@ -40,7 +40,7 @@ def get_model_from_dict(model_dict_path, model_obj, device):
 def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, device, SESSION):
     # Get train and test dir to store predictions in
     ProjectName = 'Best_Model_Predictions' + ' ' + get_current_time() + ' ' + hyper_param_net['Model'] + ' ' + 'Sampling Rate: ' + get_q_str(q) + ' and Noise Variance ' + get_noise_str(sigma)
-    train_dir, test_dir = make_predictions_dir(ProjectName, q, sigma, 'Predictions', hyper_param_net, SESSION)
+    train_dir, test_dir = make_predictions_dir(ProjectName, q, sigma, 'Predictions',param_net, hyper_param_net, SESSION)
     CalInGPU = params_net['CalInGPU']
     # Get model from dict
     # Create an instance of your model class
