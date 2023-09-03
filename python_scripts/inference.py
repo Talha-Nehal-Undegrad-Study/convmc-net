@@ -81,6 +81,7 @@ def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, par
     print("000")
     if hyper_param_net['Model'] == 'ConvMC-Net':
         model = UnfoldedNet2dC_convmc(param_net)
+        print("GG")
         model = get_model_from_dict(model_dict_path, model, device)
         CalInGPU = param_net['CalInGPU']
         
