@@ -23,7 +23,9 @@ class ISTACell_admm(nn.Module):
         self.rho = nn.Parameter(rho)
         self.S = nn.Parameter(S)
         self.coef_gamma = coef_gamma
-
+        
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        
         self.CalInGPU = CalInGPU
         self.relu = nn.ReLU()
         self.sig = nn.Sigmoid()
@@ -58,13 +60,13 @@ class ISTACell_admm(nn.Module):
         Q_tilda = torch.diag(Q.view(Q.shape[0] * Q.shape[1]))
 
         # Get S_tilda which is the kronecker product of I_N identity matrix (where N is 60) and S*S
-        S_tilda = torch.kron(torch.eye(U, device = torch.device('cuda'), requires_grad = self.CalInGPU), torch.matmul(th_S.T, th_S))
+        S_tilda = torch.kron(torch.eye(U, device = torch.device(self.device), requires_grad = self.CalInGPU), torch.matmul(th_S.T, th_S))
 
         # The Reconstruction Layer - Eq (12 in original paper)
         # Second half of equation - L is Z in the paper
         vec = th_rho * (L.view(H, U) - th_P.view(H, U)) + torch.where(entries_mask.view(H, U), input.view(H, U), 0)
         # First half of equation
-        Xtmp1 = torch.linalg.inv(Q_tilda + th_lamda1 * D_tilda + th_lamda2 * S_tilda + th_rho * torch.eye(H * U, device = torch.device('cuda'), requires_grad = self.CalInGPU))
+        Xtmp1 = torch.linalg.inv(Q_tilda + th_lamda1 * D_tilda + th_lamda2 * S_tilda + th_rho * torch.eye(H * U, device = torch.device(self.device), requires_grad = self.CalInGPU))
         # Combining the two
         Xtmp = Xtmp1 @ vec.view(H * U)
 
@@ -105,7 +107,7 @@ class UnfoldedNet3dC_admm(nn.Module):
 
         self.params = params
 
-        self.rho = to_var(torch.ones(self.layers, requires_grad=  True) * params['initial_rho'], self.CalInGPU)
+        self.rho = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_rho'], self.CalInGPU)
         self.coef_gamma = to_var(torch.tensor(params['coef_gamma'], dtype = torch.float), self.CalInGPU)
         self.neta = to_var(torch.ones(self.layers, requires_grad=True) * params['initial_neta'], self.CalInGPU)
         self.v = to_var(torch.ones(self.layers, requires_grad=True) * params['initial_v'], self.CalInGPU)
@@ -114,6 +116,7 @@ class UnfoldedNet3dC_admm(nn.Module):
 
         self.S = to_var(torch.ones((self.layers, params['size1'], params['size1']), requires_grad = True) * params['initial_S'], self.CalInGPU) # For spatial correlation
 
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.sig = nn.Sigmoid()
         self.relu = nn.ReLU()
         self.filter = self.makelayers()
@@ -139,13 +142,13 @@ class UnfoldedNet3dC_admm(nn.Module):
         entries_mask = (data[0] != 0)
         
         # Intialize the temporal matrix D which is such that its of shape (U, U - 1) and fill the main diagonal with -1's and the second diagonal with 1's such that XD = [x2 - x1, x3 - x2, ...., xN - XN-1]
-        D = torch.zeros((U, U - 1),device = torch.device('cuda'), requires_grad = False)
+        D = torch.zeros((U, U - 1),device = torch.device(self.device), requires_grad = False)
         D.fill_diagonal_(-1)
         D[1:].fill_diagonal_(1)
         D = to_var(D, self.CalInGPU)
 
         # Intialize D_tilda (eq 9 from original ADMM paper) as the kronecker product of DD* with I_M identity matrix where * represents transpose, M equals 49
-        Dtilda = torch.kron(torch.matmul(D, D.T), torch.eye(H, device = torch.device('cuda'), requires_grad = self.CalInGPU))
+        Dtilda = torch.kron(torch.matmul(D, D.T), torch.eye(H, device = torch.device(self.device), requires_grad = self.CalInGPU))
 
         # Initalize the scaled lagrange multiplier of size (49, 60). Note: Here we dont see any concept of learning alternative auxillary matrices as we do in convmc (W and B)
         P = to_var(torch.ones((self.params['size1'], self.params['size2']), requires_grad = True) * self.params['initial_P'], self.CalInGPU)
@@ -224,15 +227,18 @@ class UnfoldedNet2dC_convmc(nn.Module):
 
     # The Forward Pass recieves inputs as a list i.e. model([inputs1])
     def forward(self, x):
+        print('ff')
         data = to_var(torch.zeros([2] + list(x[0].shape)), self.CalInGPU)
+        print('ff2')
         data[0] = x[0]
         # The data matrix is x[0]
         H, U = x[0].shape
 
         # entries_mask = ~(torch.isnan(data[0]))
         entries_mask = (data[0] != 0)
-        
+        print('ff3')
         ans = self.filter([data, entries_mask, self.y1])
+        print('ff4')
         data = ans[0]
         return ans
 
@@ -312,9 +318,9 @@ class ISTACell_convmc(nn.Module):
         print('gg2')
         self.layer_num = layer_num
         print('gg3')
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.W = nn.Parameter(torch.ones((49, 60), device = torch.device(device), requires_grad = CalInGPU))
-        self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device(device), requires_grad = CalInGPU))
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.W = nn.Parameter(torch.ones((49, 60), device = torch.device(self.device), requires_grad = CalInGPU))
+        self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device(self.device), requires_grad = CalInGPU))
 
         # self.W = to_var(nn.Parameter(torch.ones((49, 60), requires_grad = True)), self.CalInGPU)
         # self.B = to_var(nn.Parameter(torch.zeros((49, 60), requires_grad = True)), self.CalInGPU)
@@ -364,11 +370,11 @@ class ISTACell_convmc(nn.Module):
 
         # Step 4: Carry out Eq (9)
         # Part 1: Performs the convolutional operation on the matrix x by replacing it with 0 where it contains missing values and then added it with L (which initially is just zeros of shape (49, 60))
-        part1_eq = L + self.conv1(torch.where(entries_mask, x, torch.tensor(0.0, device = torch.device('cuda'), requires_grad = self.CalInGPU)))
+        part1_eq = L + self.conv1(torch.where(entries_mask, x, torch.tensor(0.0, device = torch.device(self.device), requires_grad = self.CalInGPU)))
         # Part 2: Performs convolutional operation on the matrix L by first replacing it with 0 where it contains missing values then added with part1
-        part2_eq = self.conv2(torch.where(entries_mask, L, torch.tensor(0.0, device = torch.device('cuda'), requires_grad = self.CalInGPU)))
+        part2_eq = self.conv2(torch.where(entries_mask, L, torch.tensor(0.0, device = torch.device(self.device), requires_grad = self.CalInGPU)))
         # Part 3: Performs element wise multiplication between W (scaled by 1/mu) and lagrange multiplier (again first mapped its missing values to 0) + a bias
-        part3_eq = torch.mul(torch.where(entries_mask, th_y1.view(H, U), torch.tensor(0.0, device = torch.device('cuda'), requires_grad = self.CalInGPU)), th_W * th_mu_inverse) + th_B
+        part3_eq = torch.mul(torch.where(entries_mask, th_y1.view(H, U), torch.tensor(0.0, device = torch.device(self.device), requires_grad = self.CalInGPU)), th_W * th_mu_inverse) + th_B
 
         # Overall result:
         Ltmp = part1_eq + part2_eq + part3_eq # shape (49, 60)
@@ -379,11 +385,11 @@ class ISTACell_convmc(nn.Module):
         # Step 6: Update lagrange multiplier using gradient ascent
 
         # Intialize an empty matrix same size as y1 and then assign it the current largrange multiplier
-        y1tmp = torch.zeros((H, U), device = torch.device('cuda'), requires_grad = True)
+        y1tmp = torch.zeros((H, U), device = torch.device(self.device), requires_grad = True)
         y1tmp = th_y1.clone()
         # Perform Step 4 of Algorithm 1 - self explanatory (however its mu in eq not 1/mu - ask shoaib bhai)
-        y1tmp = y1tmp + (1/th_mu_inverse) * (torch.where(entries_mask, x, torch.tensor(0.0, device = torch.device('cuda'), requires_grad = self.CalInGPU)) -
-                                              torch.where(entries_mask, L, torch.tensor(0.0, device = torch.device('cuda'), requires_grad = self.CalInGPU)))
+        y1tmp = y1tmp + (1/th_mu_inverse) * (torch.where(entries_mask, x, torch.tensor(0.0, device = torch.device(self.device), requires_grad = self.CalInGPU)) -
+                                              torch.where(entries_mask, L, torch.tensor(0.0, device = torch.device(self.device), requires_grad = self.CalInGPU)))
 
         # Step 7: Update index 1 of data with the updated L and then pass the mask, data, and updated lagrange multiplier to the second layer/second ISTA cell as a list
         data[1] = L.view(H, U)
