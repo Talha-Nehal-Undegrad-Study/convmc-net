@@ -306,6 +306,7 @@ class ISTACell_convmc(nn.Module):
         self.conv1 = Conv2dC(kernel)
         self.conv2 = Conv2dC(kernel)
         self.conv3 = Conv2dC(kernel)
+        self.CalInGPU = CalInGPU
         print('gg1')
         self.mu_inverse = nn.Parameter(mu_inverse)
         print('gg2')
@@ -320,7 +321,6 @@ class ISTACell_convmc(nn.Module):
         print("HH2")
         self.coef_mu_inverse = coef_mu_inverse
 
-        self.CalInGPU = CalInGPU
         self.relu = nn.ReLU()
         self.sig = nn.Sigmoid()
 
