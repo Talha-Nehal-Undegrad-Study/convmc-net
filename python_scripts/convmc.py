@@ -300,15 +300,15 @@ class ISTACell_convmc(nn.Module):
     # Constuctor initializes the parameters that have to be learnt per layer like mu_inverse and some that stay constant throughout like coef_mu_inverse
     def __init__(self, layer_num, kernel, mu_inverse, coef_mu_inverse, CalInGPU):
         super(ISTACell_convmc,self).__init__()
-
+        print('gg')
         self.conv1 = Conv2dC(kernel)
         self.conv2 = Conv2dC(kernel)
         self.conv3 = Conv2dC(kernel)
-
+        print('gg1')
         self.mu_inverse = nn.Parameter(mu_inverse)
-
+        print('gg2')
         self.layer_num = layer_num
-
+        print('gg3')
         # self.W = nn.Parameter(torch.ones((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
         # self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
         print("HH")
