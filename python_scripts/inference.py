@@ -54,7 +54,7 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
     # Perform Inference on Train Dataset
     with torch.inference_mode():
       for batch, (D, L) in enumerate(train_loader):
-        for mat in range(batch):
+        for mat in range(hyper_param_net['BatchSize']):
           # Get inputs and targets and forward pass
           inputsv1 = to_var(D[mat], CalInGPU)
           targets_Lv = to_var(L[mat], CalInGPU)
@@ -66,7 +66,7 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
     # Perform Inference on Test Dataset
     with torch.inference_mode():
       for batch, (D, L) in enumerate(val_loader):
-        for mat in range(batch):
+        for mat in range(hyper_param_net['ValBatchSize']):
           # Get inputs and targets and forward pass
           inputsv1 = to_var(D[mat], CalInGPU)
           targets_Lv = to_var(L[mat], CalInGPU)
