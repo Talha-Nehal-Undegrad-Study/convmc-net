@@ -311,10 +311,11 @@ class ISTACell_convmc(nn.Module):
 
         # self.W = nn.Parameter(torch.ones((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
         # self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
-
+        print("HH")
         self.W = to_var(nn.Parameter(torch.ones((49, 60), requires_grad = True)), self.CalInGPU)
+        print("HH1")
         self.B = to_var(nn.Parameter(torch.zeros((49, 60), requires_grad = True)), self.CalInGPU)
-        
+        print("HH2")
         self.coef_mu_inverse = coef_mu_inverse
 
         self.CalInGPU = CalInGPU
