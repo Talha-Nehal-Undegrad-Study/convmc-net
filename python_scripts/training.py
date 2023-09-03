@@ -118,7 +118,7 @@ def test_step(model, dataloader, loss_fn, optimizer, CalInGPU, Alpha, ValInstanc
 
   # Validation
   with torch.no_grad():
-    for batch, (Dv, Lv) in enumerate(dataloader):
+    for batch_no, (Dv, Lv) in enumerate(dataloader):
       for jj in range(batch):
         inputsv1 = to_var(Dv[jj], CalInGPU)   # "jj"th picture
         targets_Lv = to_var(Lv[jj], CalInGPU)
