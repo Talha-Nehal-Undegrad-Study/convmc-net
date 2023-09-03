@@ -312,15 +312,17 @@ class ISTACell_convmc(nn.Module):
         print('gg2')
         self.layer_num = layer_num
         print('gg3')
-        # self.W = nn.Parameter(torch.ones((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
-        # self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device('cuda'), requires_grad = CalInGPU))
+        self.W = nn.Parameter(torch.ones((49, 60), device = torch.device('cpu'), requires_grad = CalInGPU))
+        self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device('cpu'), requires_grad = CalInGPU))
+
+        # self.W = to_var(nn.Parameter(torch.ones((49, 60), requires_grad = True)), self.CalInGPU)
+        # self.B = to_var(nn.Parameter(torch.zeros((49, 60), requires_grad = True)), self.CalInGPU)
+        
         print("HH")
-        self.W = to_var(nn.Parameter(torch.ones((49, 60), requires_grad = True)), self.CalInGPU)
-        print("HH1")
-        self.B = to_var(nn.Parameter(torch.zeros((49, 60), requires_grad = True)), self.CalInGPU)
+        
         print("HH2")
         self.coef_mu_inverse = coef_mu_inverse
-
+        
         self.relu = nn.ReLU()
         self.sig = nn.Sigmoid()
 
