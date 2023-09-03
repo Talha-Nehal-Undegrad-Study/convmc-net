@@ -256,14 +256,16 @@ class UnfoldedNet2dC_convmc(nn.Module):
 
 # Conv2D class
 class Conv2dC(nn.Module):
-    def __init__(self, kernel):
+    def __init__(self, kernel, device):
         super(Conv2dC, self).__init__()
 
         # Given a kernel size of 2 dimensions, we calculate the padding through the formula (k[0] - 1)/2
         pad0 = int((kernel[0] - 1) / 2)
         pad1 = int((kernel[1] - 1) / 2)
-
-        self.convR = to_var(nn.Conv2d(1, 1, (kernel[0], kernel[0]), (1, 1), (pad0, pad0), groups = 1), self.CalInGPU)
+        if torch.cuda.is_available():
+            self.convR = nn.Conv2d(1, 1, (kernel[0], kernel[0]), (1, 1), (pad0, pad0), groups = 1).cuda()
+        else:
+            self.convR = nn.Conv2d(1, 1, (kernel[0], kernel[0]), (1, 1), (pad0, pad0), groups = 1).to('cpu')
         # At groups = in_channels, each input channel is convolved with its own set of filters (of size out_channels/in_channels)
 
     def forward(self, x):
