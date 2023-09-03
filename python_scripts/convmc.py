@@ -212,12 +212,13 @@ class UnfoldedNet2dC_convmc(nn.Module):
         # model = LearnableMatrices(input_channels, output_channels)
 
         # W, B = model(y1)
-
-
-
+        
         self.sig = nn.Sigmoid()
+        print("here7")
         self.relu = nn.ReLU()
+        print("here8")
         self.filter = self.makelayers()
+        print("here9")
 
     # For each of the layers in the unfolded nn, we create ISTA cell block with the kernel, mu_inverse, reosy1,....., all of the parameters. And then combine all layers (5 in our case) using
     # nn.Sequential forming the overall architecture
