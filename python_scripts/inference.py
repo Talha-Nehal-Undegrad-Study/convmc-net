@@ -32,7 +32,7 @@ def get_model_from_dict(model_dict_path, model_obj, device):
   model_state_dict = torch.load(model_dict_path, map_location = torch.device(device))
   print('model2')
   # Load the state dictionary into your model
-  model_obj = model_obj.load_state_dict(model_state_dict)
+  model_obj.load_state_dict(model_state_dict)
   print('model1')
   # return model
   return model_obj.to(device)
