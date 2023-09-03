@@ -103,9 +103,9 @@ def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, par
         optimizer = torch.optim.Adam(net.parameters(), lr = hyper_param_net['Lr'])
         scheduler2 =  torch.optim.lr_scheduler.StepLR(optimizer, step_size= 1, gamma = 0.97, verbose = True)
         # Get train loss mean from train step
-        loss_mean, loss_lowrank_mean = train_step(model, train_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
+        loss_mean, loss_lowrank_mean = train_step(model, train_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'], inference = True)
         # Get test loss mean from test step
-        loss_val_mean, loss_val_lowrank_mean = test_step(model, val_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'])
+        loss_val_mean, loss_val_lowrank_mean = test_step(model, val_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'], inference = True)
         # Return the tuple of loss_lowrank_mean and loss_val_lowrank_mean
         return (loss_lowrank_mean, loss_val_lowrank_mean)
 
