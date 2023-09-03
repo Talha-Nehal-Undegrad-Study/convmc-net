@@ -43,7 +43,9 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
     # Get model from dict
     # Create an instance of your model class
     model = UnfoldedNet2dC_convmc(params_net)
+    print("tt")
     model = get_model_from_dict(model_dict_path, model, device)
+    print("ww")
     # Put model in eval mode
     model.eval()
 
