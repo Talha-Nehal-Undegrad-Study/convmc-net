@@ -89,7 +89,7 @@ def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, par
         
         # Set up loss and optimizer
         floss = nn.MSELoss()
-        optimizer = torch.optim.Adam(net.parameters(), lr = hyper_param_net['Lr'])
+        optimizer = torch.optim.Adam(model.parameters(), lr = hyper_param_net['Lr'])
         scheduler2 =  torch.optim.lr_scheduler.StepLR(optimizer, step_size = 1, gamma = 0.97, verbose = True)
         
         # Get train loss mean from train step
@@ -105,7 +105,7 @@ def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, par
     
         # Set up loss and optimizer
         floss = nn.MSELoss()
-        optimizer = torch.optim.Adam(net.parameters(), lr = hyper_param_net['Lr'])
+        optimizer = torch.optim.Adam(model.parameters(), lr = hyper_param_net['Lr'])
         scheduler2 =  torch.optim.lr_scheduler.StepLR(optimizer, step_size= 1, gamma = 0.97, verbose = True)
         # Get train loss mean from train step
         loss_mean, loss_lowrank_mean = train_step(model, train_loader, floss, optimizer, CalInGPU, hyper_param_net['Alpha'], hyper_param_net['TrainInstances'], hyper_param_net['BatchSize'], inference = True)
