@@ -124,9 +124,7 @@ class UnfoldedNet3dC_admm(nn.Module):
     # Function which intializes num_layers ISTA cells by passing it those parameters that are learnt per layer like lambda1/2, neta, S and those that are fixed like coef_gamma
     def makelayers(self):
         filt = []
-        print(self.layers)
         for i in range(self.layers):
-          print('layer number', i)
           filt.append(ISTACell_admm(self.neta[i], self.v[i], self.lamda1[i],self.lamda2[i], self.S[i], self.rho[i], self.coef_gamma, self.CalInGPU))
         return nn.Sequential(*filt)
 
@@ -217,28 +215,21 @@ class UnfoldedNet2dC_convmc(nn.Module):
     # For each of the layers in the unfolded nn, we create ISTA cell block with the kernel, mu_inverse, reosy1,....., all of the parameters. And then combine all layers (5 in our case) using
     # nn.Sequential forming the overall architecture
     def makelayers(self):
-        print("make1")
         filt = []
-        print("make1")
         for i in range(self.layers):
-            print(f"make {i + 3}")
             filt.append(ISTACell_convmc(i, self.kernel[i], self.mu_inverse[i], self.coef_mu_inverse, self.CalInGPU))
         return nn.Sequential(*filt)
 
     # The Forward Pass recieves inputs as a list i.e. model([inputs1])
     def forward(self, x):
-        print('ff')
         data = to_var(torch.zeros([2] + list(x[0].shape)), self.CalInGPU)
-        print('ff2')
         data[0] = x[0]
         # The data matrix is x[0]
         H, U = x[0].shape
 
         # entries_mask = ~(torch.isnan(data[0]))
         entries_mask = (data[0] != 0)
-        print('ff3')
         ans = self.filter([data, entries_mask, self.y1])
-        print('ff4')
         data = ans[0]
         return ans
 
@@ -308,25 +299,19 @@ class ISTACell_convmc(nn.Module):
     # Constuctor initializes the parameters that have to be learnt per layer like mu_inverse and some that stay constant throughout like coef_mu_inverse
     def __init__(self, layer_num, kernel, mu_inverse, coef_mu_inverse, CalInGPU):
         super(ISTACell_convmc,self).__init__()
-        print('gg')
         self.conv1 = Conv2dC(kernel)
         self.conv2 = Conv2dC(kernel)
         self.conv3 = Conv2dC(kernel)
         self.CalInGPU = CalInGPU
-        print('gg1')
         self.mu_inverse = nn.Parameter(mu_inverse)
-        print('gg2')
         self.layer_num = layer_num
-        print('gg3')
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.W = nn.Parameter(torch.ones((49, 60), device = torch.device(self.device), requires_grad = CalInGPU))
         self.B = nn.Parameter(torch.zeros((49, 60), device = torch.device(self.device), requires_grad = CalInGPU))
 
         # self.W = to_var(nn.Parameter(torch.ones((49, 60), requires_grad = True)), self.CalInGPU)
         # self.B = to_var(nn.Parameter(torch.zeros((49, 60), requires_grad = True)), self.CalInGPU)
-        
-        print("HH")
-        
+                
         self.coef_mu_inverse = coef_mu_inverse
         
         self.relu = nn.ReLU()
