@@ -27,13 +27,9 @@ ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SP
 # Another small helper function 'get_model_from_dict' which takes a model diretory and returns a model from it
 def get_model_from_dict(model_dict_path, model_obj, device):
   # Load the model dictionary
-  print("gjg")
-  print(model_dict_path)
   model_state_dict = torch.load(model_dict_path, map_location = torch.device(device))
-  print('model2')
   # Load the state dictionary into your model
   model_obj.load_state_dict(model_state_dict)
-  print('model1')
   # return model
   return model_obj.to(device)
 
@@ -45,9 +41,7 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
     # Get model from dict
     # Create an instance of your model class
     model = UnfoldedNet2dC_convmc(params_net)
-    print("tt")
     model = get_model_from_dict(model_dict_path, model, device)
-    print("ww")
     # Put model in eval mode
     model.eval()
 
@@ -80,10 +74,8 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
 
 def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, param_net, hyper_param_net, device):
     # Get model from dict
-    print("000")
     if hyper_param_net['Model'] == 'ConvMC-Net':
         model = UnfoldedNet2dC_convmc(param_net)
-        print("GG")
         model = get_model_from_dict(model_dict_path, model, device)
         CalInGPU = param_net['CalInGPU']
         
