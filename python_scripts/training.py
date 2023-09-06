@@ -91,12 +91,9 @@ def train_step(model, dataloader, loss_fn, optimizer, CalInGPU, Alpha, TrainInst
         for ii in range(batch):
             inputs1 = to_var(D[ii], CalInGPU)
             targets_L = to_var(L[ii], CalInGPU)
-            print('train1')
             # Forward + backward + loss
             lst_1 = model([inputs1])
-            print('train2')
             outputs_L = lst_1[0][1]
-            print('train3')
             # Current loss
             loss = (Alpha * loss_fn(outputs_L, targets_L))/torch.square(torch.norm(targets_L, p = 'fro'))
             loss_lowrank = (loss_fn(outputs_L,targets_L))/torch.square(torch.norm(targets_L, p = 'fro'))
