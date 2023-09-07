@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 
-ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SPROJ-ConvMC-Net/Sensor Data'
+ROOT = '/home/gcf/Desktop/Talha_Nehal Sproj/Tahir Sproj Stuff/SPROJ_ConvMC_Net'
 
 def preprocess(L, D, size1, size2, size3):
 
