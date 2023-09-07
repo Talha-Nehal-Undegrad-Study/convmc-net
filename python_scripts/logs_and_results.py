@@ -4,7 +4,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SPROJ-ConvMC-Net/Sensor Data'
+ROOT = '/home/gcf/Desktop/Talha_Nehal Sproj/Tahir Sproj Stuff/SPROJ_ConvMC_Net/Sensor_Data'
 
 # Small Helper Function to modularize training loop
 # Short functions to get sampling rate and noise variables as strings. make_dir is a function which takes the appropriate noise and sampling rate directory and makes there a directory for either logs or
