@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 
-ROOT = '/home/gcf/Desktop/Talha_Nehal Sproj/Tahir Sproj Stuff/SPROJ_ConvMC_Net'
+ROOT = '/home/gcf/Desktop/Talha_Nehal Sproj/Tahir Sproj Stuff/SPROJ_ConvMC_Net/Sensor_Data'
 
 def preprocess(L, D, size1, size2, size3):
 
