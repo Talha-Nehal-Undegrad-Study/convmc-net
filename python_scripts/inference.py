@@ -22,7 +22,7 @@ from dataset_processing import ImageDataset
 from logs_and_results import get_current_time, get_noise_str, get_q_str, make_predictions_dir
 from training import get_hyperparameter_grid, get_model, train_step, test_step
 
-ROOT = '/content/drive/MyDrive/DUPA - RCPA/Technology transfer deep unfolding/SPROJ-ConvMC-Net/Sensor Data'
+ROOT = '/home/gcf/Desktop/Talha_Nehal Sproj/Tahir Sproj Stuff/SPROJ_ConvMC_Net/Sensor_Data'
 
 # Another small helper function 'get_model_from_dict' which takes a model diretory and returns a model from it
 def get_model_from_dict(model_dict_path, model_obj, device):
