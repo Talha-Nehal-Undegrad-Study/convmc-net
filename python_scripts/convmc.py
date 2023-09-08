@@ -7,8 +7,7 @@ from torch.autograd import Variable
 def to_var(X, CalInGPU):
     if CalInGPU and torch.cuda.is_available():
         X = X.cuda()
-        X.requires_grad = True
-    return X
+    return Variable(X)
 
 
 class ISTACell_admm(nn.Module):
