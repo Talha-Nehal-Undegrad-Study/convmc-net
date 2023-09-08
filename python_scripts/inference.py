@@ -54,7 +54,7 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
           targets_Lv = to_var(L[mat], CalInGPU)
           lst_2 = model([inputsv1])  # Forward
           # Get predicted L and save it in the corresponding dir
-          pred_L = lst_2[0][1]
+          pred_L = (lst_2[0][1]).cpu()
           np.save(train_dir + '/pred_mat_MC_train' + str(batch) + '.npy', pred_L)
 
     # Perform Inference on Test Dataset
@@ -66,7 +66,7 @@ def make_and_store_predictions(model_dict_path, q, sigma, params_net, hyper_para
           targets_Lv = to_var(L[mat], CalInGPU)
           lst_2 = model([inputsv1])  # Forward
           # Get predicted L and save it in the corresponding dir
-          pred_L = lst_2[0][1]
+          pred_L = lst_2[0][1].cpu()
           np.save(test_dir + '/pred_mat_MC_test' + str(batch) + '.npy', pred_L)
 
 # Another helper function which when given the same arguement as make_and_store_predictions except that of train and test dir, performs inference and gets the train_loss and validation_loss mean
