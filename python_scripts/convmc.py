@@ -2,12 +2,12 @@
 import numpy as np
 import torch
 from torch import nn
-
+from torch.autograd import Variable
 # Function for cpu or gpu assignment
 def to_var(X,CalInGPU):
     if CalInGPU and torch.cuda.is_available():
         X = X.cuda()
-    return X
+    return Variable(X)
 
 
 class ISTACell_admm(nn.Module):
