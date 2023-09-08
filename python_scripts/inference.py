@@ -174,4 +174,4 @@ def search_and_save_best_model(SESSION, params_net, q, sigma, model, device):
     saving_best_model_path = os.path.join(source_dir, 'best_model.pth')
     shutil.copy(best_model_path, saving_best_model_path)
 
-    return min_ratio
+    return min_loss
