@@ -116,7 +116,7 @@ def find_min_train_val_loss(dict_loss):
   for index, (numerator, denominator) in enumerate(dict_loss.values()):
       loss = denominator
 
-      if loss < min_ratio:
+      if loss < min_loss:
           min_loss = loss
           min_loss_index = index
 
