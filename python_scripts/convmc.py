@@ -125,7 +125,7 @@ class UnfoldedNet3dC_admm(nn.Module):
     def makelayers(self):
         filt = []
         for i in range(self.layers):
-          filt.append(ISTACell_admm(self.neta[i], self.v[i], self.lamda1[i],self.lamda2[i], self.S[i], self.rho[i], self.coef_gamma, self.CalInGPU))
+          filt.append(ISTACell_admm(self.neta[i], self.v[i], self.lamda1[i] ** (i + 1), self.lamda2[i] ** (i + 1), self.S[i], self.rho[i] ** (i + 1), self.coef_gamma, self.CalInGPU))
         return nn.Sequential(*filt)
 
     # Forward Pass recieves a list containing only one element for now and that is the Lowrank(denoised maybe) component
