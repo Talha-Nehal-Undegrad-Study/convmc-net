@@ -109,18 +109,18 @@ def evaluate_each_model(model_dict_path, train_loader, val_loader, CalInGPU, par
 # Another helper function when giving a dictionary where the key's are a string (specifying the path to the model) and the value is a tuple of size 2 containing train and val_loss. The function will
 # find the index in the dictionary where the tuple has minimum ratio
 
-def find_min_train_val_loss_ratio(dict_loss):
-  min_ratio = float('inf')  # Initialize with positive infinity
-  min_ratio_index = None
+def find_min_train_val_loss(dict_loss):
+  min_loss = float('inf')  # Initialize with positive infinity
+  min_loss_index = None
 
   for index, (numerator, denominator) in enumerate(dict_loss.values()):
-      ratio = numerator / denominator
+      loss = denominator
 
-      if ratio < min_ratio:
-          min_ratio = ratio
-          min_ratio_index = index
+      if loss < min_ratio:
+          min_loss = loss
+          min_loss_index = index
 
-  return min_ratio_index, min_ratio
+  return min_loss_index, min_loss
 
 # Another helper function. Given a session, q, sigma, and the model, we get all the models made that session, perform inference on it and find best performing model of that session and then rename that
 # as 'best_model.....'
@@ -161,10 +161,10 @@ def search_and_save_best_model(SESSION, params_net, q, sigma, model, device):
         dict_loss[final_model_path] = loss_tuple
     
     # After performing inference on all models of a specific session and storing their results we get the path to the model which has the minimum val_loss to train_loss ratio
-    min_ratio_index, min_ratio = find_min_train_val_loss_ratio(dict_loss)
+    min_loss_index, min_loss = find_min_train_val_loss(dict_loss)
     
     # Get the best model path
-    best_model_path = (list(dict_loss.keys()))[min_ratio_index]
+    best_model_path = (list(dict_loss.keys()))[min_loss_index]
     
     # Finding the best performing model, we move on to storing its predictions on the train and test dataset as per our 'make_and_store_predictions' function
     make_and_store_predictions(best_model_path, q, sigma, params_net, hyper_param_net, train_loader, val_loader, device, SESSION)
