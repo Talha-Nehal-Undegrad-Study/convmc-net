@@ -89,7 +89,7 @@ def get_modularized_record(project_name, q, sigma, new_entry, hyper_param_net, p
 
 def plot_and_save_mse_vs_epoch(epochs_vec, lossmean_vec, hyper_param_net, lossmean_val_vec, dir, current_epoch):
   fig = plt.figure(figsize = (8, 6), dpi = 100)
-  epochs_vec = np.arange(0, hyper_param_net['Epochs'], 1)
+  epochs_vec = np.arange(1, hyper_param_net['Epochs'], 1)
   plt.plot(epochs_vec[current_epoch - 5: current_epoch], lossmean_vec[current_epoch - 5: current_epoch], '-*', label = 'loss')
   plt.plot(epochs_vec[current_epoch - 5: current_epoch], lossmean_val_vec[current_epoch - 5: current_epoch], '-*', label = 'loss_val')
   plt.xlabel('Epoch')
