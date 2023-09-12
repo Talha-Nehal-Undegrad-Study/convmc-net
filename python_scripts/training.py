@@ -99,8 +99,8 @@ def train_step(model, dataloader, loss_fn, optimizer, CalInGPU, Alpha, TrainInst
             loss_lowrank = (loss_fn(outputs_L,targets_L))/torch.square(torch.norm(targets_L, p = 'fro'))
             loss_mean += loss.item()
             loss_lowrank_mean += loss_lowrank.item()
-        if not inference:
-          loss.backward()
+            if not inference:
+              loss.backward()
     if not inference:
         optimizer.step()
   loss_mean = loss_mean/TrainInstances
