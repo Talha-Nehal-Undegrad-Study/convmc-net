@@ -1,13 +1,3 @@
-fig3 = plt.figure(figsize=(8, 6), dpi=100)
-    colormap=plt.cm.gist_ncar
-    plt.gca().set_prop_cycle(color=(\
-           [colormap(i) for i in np.linspace(0, 0.9, 2*params_net['layers'])]))
-    for i in range(net.layers):
-        plt.plot(epochs_vec,lamda2_vec[:,i],label='%dth layer'%(i+1))
-    plt.legend()
-    plt.xlabel('epoch')
-    plt.ylabel('lamda2')
-    plt.title("lamda2 as function of epochs")
 import numpy as np
 import torch
 from torch import nn
