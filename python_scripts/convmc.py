@@ -171,7 +171,7 @@ class UnfoldedNet3dC_admm(nn.Module):
 
         if torch.cuda.is_available():
           neta = neta.cpu().detach().numpy()
-          v= v.cpu().detach().numpy()
+          v = v.cpu().detach().numpy()
           lamda1 = lamda1.cpu().detach().numpy()
           lamda2 = lamda2.cpu().detach().numpy()
           S = S.cpu().detach().numpy()
