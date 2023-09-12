@@ -3,8 +3,8 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 # Function for cpu or gpu assignment
-def to_var(X, CalInGPU, requires_grad = False):
-    if CalInGPU and torch.cuda.is_available() and requires_grad == True:
+def to_var(X, CalInGPU):
+    if CalInGPU and torch.cuda.is_available():
         X = X.cuda()
     return Variable(X)
 
@@ -106,12 +106,12 @@ class UnfoldedNet3dC_admm(nn.Module):
 
         self.params = params
 
-        self.rho = to_var(torch.ones(self.layers, requires_grad = False) * params['initial_rho'], self.CalInGPU, True)
+        self.rho = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_rho'], self.CalInGPU)
         self.coef_gamma = to_var(torch.tensor(params['coef_gamma'], dtype = torch.float), self.CalInGPU)
-        self.neta = to_var(torch.ones(self.layers, requires_grad = False) * params['initial_neta'], self.CalInGPU, True)
-        self.v = to_var(torch.ones(self.layers, requires_grad = False) * params['initial_v'], self.CalInGPU, True)
-        self.lamda1 = to_var(torch.ones(self.layers, requires_grad = False) * params['initial_lamda1'], self.CalInGPU, True)
-        self.lamda2 = to_var(torch.ones(self.layers, requires_grad = False) * params['initial_lamda2'], self.CalInGPU, True)
+        self.neta = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_neta'], self.CalInGPU)
+        self.v = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_v'], self.CalInGPU, True)
+        self.lamda1 = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_lamda1'], self.CalInGPU)
+        self.lamda2 = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_lamda2'], self.CalInGPU)
 
         self.S = to_var(torch.ones((self.layers, params['size1'], params['size1']), requires_grad = True) * params['initial_S'], self.CalInGPU, True) # For spatial correlation
 
