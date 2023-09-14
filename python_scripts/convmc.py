@@ -109,7 +109,7 @@ class UnfoldedNet3dC_admm(nn.Module):
         self.rho = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_rho'], self.CalInGPU)
         self.coef_gamma = to_var(torch.tensor(params['coef_gamma'], dtype = torch.float), self.CalInGPU)
         self.neta = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_neta'], self.CalInGPU)
-        self.v = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_v'], self.CalInGPU, True)
+        self.v = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_v'], self.CalInGPU)
         self.lamda1 = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_lamda1'], self.CalInGPU)
         self.lamda2 = to_var(torch.ones(self.layers, requires_grad = True) * params['initial_lamda2'], self.CalInGPU)
 
