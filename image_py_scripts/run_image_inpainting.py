@@ -2,51 +2,109 @@ import numpy as np
 from skimage import io, color, img_as_float
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
-from scipy.stats import binom, norm
-from scipy.optimize import minimize
+from scipy.stats import binom
+import torch
+import os
+import matplotlib.pyplot as plt
+from image_py_scripts import gaussian_noise, convmc
 
-from image_py_scripts import gaussian_noise
+ROOT = 'C:/Users/Talha/OneDrive - Higher Education Commission/Documents/GitHub/convmc-net/'
+DATA_PATH = os.path.join(ROOT, 'Image_Inpainting_Data')
+SYNTHETIC_DATA_PATH = os.path.join(ROOT, 'Image_Inpainting_Dataset')
 
-# Function to implement image inpainting
-def image_inpainting(M, M_Omega, rak, maxiter, model):
-    # Placeholder function for image inpainting
-    # Replace with your image inpainting implementation
-    # Call trained model and get reconstructed M_Omega
-    M_omega_reconstructed = model(M_Omega)
+# Function to read and preprocess images
+def read_and_preprocess_image(image_path, r, c):
+    image = io.imread(image_path)
+    image = color.rgb2gray(img_as_float(image))
+    image = np.resize(image, (r, c))
+    return image
+
+# Function to add GMM noise to the image
+def add_gmm_noise(image, per, dB):
+    r, c = 150, 300
+    array_Omega = np.random.choice([1, 0], (r, c), True, [per, 1 - per])
+    M_Omega = np.multiply(image, array_Omega)
+
+    omega = np.where(array_Omega == 1)
+
+    noise = gaussian_noise.gaussian_noise(M_Omega[omega], 'GM', dB)
+    Noise = np.zeros(M_Omega.shape)
+    Noise[omega] = noise
+    M_Omega = M_Omega + Noise
+
+    return torch.from_numpy(M_Omega)
+
+# Function to evaluate image inpainting
+def evaluate_inpainting(M, M_Omega, model_path, model):
+    model_path = model_path.replace('\\', '/')
+    model.load_state_dict(torch.load(model_path, map_location = 'cpu'))
+    model.eval()
+    with torch.no_grad():
+        M_omega_reconstructed = (model([M_Omega]))[0][1]
+    M_omega_reconstructed = M_omega_reconstructed.numpy()
+    M_omega_reconstructed = M_omega_reconstructed.astype(np.float32)
     PSNR = psnr(M, M_omega_reconstructed)
-    SSIM = ssim(M, M_omega_reconstructed)
+    SSIM = ssim(M, M_omega_reconstructed, data_range = 1)
     return PSNR, SSIM
 
-# Parameters
-r, c, rak = 400, 500, 10
-dB = 5
-per = 0.5
-models = ['L0-BCD', 'Lp-reg', 'Lp-ADMM', 'ORMC', 'M-Estimation']
-PSNRs = np.zeros((len(models), 8))
-SSIMs = np.zeros((len(models), 8))
+# Function to plot PSNRs and SSIMs
+def plot_metrics(PSNRs, SSIMs, save_directory):
+    # Plotting PSNRs
+    plt.figure(figsize = (10, 6))
+    for idx, psnr_values_per_model in enumerate(PSNRs):
+        plt.plot(range(1, 9), psnr_values_per_model, label = f"Sampling {20 + 10 * idx}%")
+    plt.xlabel("Image")
+    plt.ylabel("PSNR")
+    plt.title("PSNR Comparison (5DB)")
+    plt.legend()
+    plt.grid(True)
+    psnr_plot_path = os.path.join(save_directory, "psnr_plot.png")
+    plt.savefig(psnr_plot_path)
+    plt.show()
 
-# Loop through models and images
-for m in range(len(models)):
-    for i in range(1, 9):
-        # Read Image and convert into black and white and reshape into 150 x 300
-        # Replace the path with your own
-        image_path = f'C:/Users/Talha/OneDrive - Higher Education Commission/Documents/GitHub/M-estimation-RMC/M-Estimation/Image_Inpainting_Dataset/{i}.jpg'
-        M = io.imread(image_path)
-        M = color.rgb2gray(img_as_float(M))
-        M = np.resize(M, (r, c))
+    # Plotting SSIMs
+    plt.figure(figsize=(10, 6))
+    for idx, ssim_values_per_model in enumerate(SSIMs):
+        plt.plot(range(1, 9), ssim_values_per_model, label = f"Sampling {20 + 10 * idx}%")
+    plt.xlabel("Image")
+    plt.ylabel("SSIM")
+    plt.title("SSIM Comparison (5DB)")
+    plt.legend()
+    plt.grid(True)
+    ssim_plot_path = os.path.join(save_directory, "ssim_plot.png")
+    plt.savefig(ssim_plot_path)
+    plt.show()
 
-        # Add GMM noise
-        array_Omega = binom.rvs(1, per, size=(r, c))
-        M_Omega = M * array_Omega
-        omega = np.where(array_Omega == 1)
-        noise = gaussian_noise(M_Omega[omega], 1, dB)
-        Noise = np.zeros_like(M_Omega)
-        Noise[omega] = noise
-        M_Omega = M_Omega + Noise
-        maxiter = 50
+# Function to orchestrate the image inpainting pipeline
+def run_image_inpainting_pipeline(file_paths, save_directory, model):
+    # Parameters
+    r, c, rak = 150, 300, 10
+    dB = 5
+    per = 0.5
+    PSNRs = []
+    SSIMs = []
 
-        PSNR, SSIM = image_inpainting(M, M_Omega, rak, maxiter, models[m])
-        print(f'Model: {models[m]}, PSNR of Image {i} = {PSNR}, SSIM of Image {i} = {SSIM}')
+    # Loop through models and images
+    for idx, file_path in enumerate(file_paths):
+        psnr_per_model = []
+        ssim_per_model = []
+        for i in range(1, 9):
+            # Read Image and convert into black and white and reshape into 150 x 300
+            image_path = os.path.join(DATA_PATH, f"{i}.jpg")
+            M = read_and_preprocess_image(image_path, r, c)
 
-        PSNRs[m, i-1] = PSNR
-        SSIMs[m, i-1] = SSIM
+            # Add GMM noise
+            M_Omega = add_gmm_noise(M, per, dB)
+            maxiter = 50
+
+            PSNR, SSIM = evaluate_inpainting(M, M_Omega, file_path, model)
+            print(f'Model: {"ConvMC-Net"}, PSNR of Image {i} = {PSNR}, SSIM of Image {i} = {SSIM}')
+
+            psnr_per_model.append(PSNR)
+            ssim_per_model.append(SSIM)
+
+        PSNRs.append(psnr_per_model)
+        SSIMs.append(ssim_per_model)
+
+    # Plot PSNRs and SSIMs
+    plot_metrics(PSNRs, SSIMs, save_directory)

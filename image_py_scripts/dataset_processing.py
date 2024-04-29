@@ -28,8 +28,8 @@ class ImageDataset(data.Dataset):
         # TRAIN
         if split == 0:
             for n in range(NumInstances):
-                L = np.load(ROOT + '/lowrank/train/L_mat_MC_train' + str(n + 1) + '.npy')
-                D = np.load(ROOT + '/groundtruth/train/ground_mat_MC_train' + str(n + 1) + '.npy')
+                L = np.load(ROOT + '\\lowrank/train/L_mat_MC_train' + str(n + 1) + '.npy')
+                D = np.load(ROOT + '\\groundtruth/train/ground_mat_MC_train' + str(n + 1) + '.npy')
                 # L, D = preprocess(L, D, None, None, None)
 
                 images_L[n] = torch.from_numpy(L)
@@ -38,8 +38,8 @@ class ImageDataset(data.Dataset):
          # TEST
         if split == 1:
             for n in range(NumInstances):
-                L = np.load(ROOT + '/lowrank/test/L_mat_MC_test' + str(n + 1) + '.npy')
-                D = np.load(ROOT + '/groundtruth/test/ground_mat_MC_test' + str(n + 1) + '.npy')
+                L = np.load(ROOT + '\\lowrank/test/L_mat_MC_test' + str(n + 1) + '.npy')
+                D = np.load(ROOT + '\\groundtruth/test/ground_mat_MC_test' + str(n + 1) + '.npy')
                 # L, D = preprocess(L, D, None, None, None)
 
                 images_L[n] = torch.from_numpy(L)

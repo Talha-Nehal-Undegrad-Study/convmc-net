@@ -221,7 +221,6 @@ class UnfoldedNet2dC_convmc(nn.Module):
 
     # The Forward Pass recieves inputs as a list i.e. model([inputs1])
     def forward(self, x):
-        print("HHH")
         data = to_var(torch.zeros([2] + list(x[0].shape)), self.CalInGPU)
         data[0] = x[0]
         # The data matrix is x[0]
@@ -348,7 +347,6 @@ class ISTACell_convmc(nn.Module):
         x = data[0]
         L = data[1]
         H, U = x.shape
-        print(H, U)
 
         # Step 3: Scale mu_inverse by sigmoid and coef_mu_inverse to be used later for the iterative step. Also get some parameters
         th_mu_inverse = self.sig(self.mu_inverse) * self.coef_mu_inverse

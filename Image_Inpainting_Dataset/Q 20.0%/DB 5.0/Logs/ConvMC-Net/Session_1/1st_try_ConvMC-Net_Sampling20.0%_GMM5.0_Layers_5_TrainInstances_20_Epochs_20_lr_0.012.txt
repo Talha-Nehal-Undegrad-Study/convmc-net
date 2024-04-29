@@ -10,4 +10,77 @@ Loading phase...
 Finished loading.
 
 
-2024-04-30 04:07:57
+2024-04-30 04:38:56
+
+Min Loss = 0.0000e+00
+2024-04-30 04:39:02
+
+Min Loss = 0.0000e+00
+2024-04-30 04:39:07
+
+Min Loss = 0.0000e+00
+2024-04-30 04:39:11
+
+Min Loss = 0.0000e+00
+2024-04-30 04:39:18
+Loading and calculating training batches...
+Training time is 4.846392
+Loading and calculating validation batches...
+Test time is 0.947020
+
+Min Loss = 0.0000e+00
+2024-04-30 04:39:25
+
+Min Loss = 0.0000e+00
+2024-04-30 04:39:32
+
+Min Loss = 0.0000e+00
+2024-04-30 04:39:39
+
+Min Loss = 0.0000e+00
+2024-04-30 04:39:45
+
+Min Loss = 0.0000e+00
+2024-04-30 04:39:54
+Loading and calculating training batches...
+Training time is 6.502221
+Loading and calculating validation batches...
+Test time is 0.918684
+
+Min Loss = 0.0000e+00
+2024-04-30 04:40:03
+
+Min Loss = 0.0000e+00
+2024-04-30 04:40:11
+
+Min Loss = 0.0000e+00
+2024-04-30 04:40:17
+
+Min Loss = 0.0000e+00
+2024-04-30 04:40:25
+
+Min Loss = 0.0000e+00
+2024-04-30 04:40:33
+Loading and calculating training batches...
+Training time is 4.713429
+Loading and calculating validation batches...
+Test time is 0.968028
+
+Min Loss = 0.0000e+00
+2024-04-30 04:40:41
+
+Min Loss = 0.0000e+00
+2024-04-30 04:40:47
+
+Min Loss = 0.0000e+00
+2024-04-30 04:40:55
+
+Min Loss = 0.0000e+00
+2024-04-30 04:41:02
+
+Min Loss = 0.0000e+00
+2024-04-30 04:41:10
+Loading and calculating training batches...
+Training time is 3.903819
+Loading and calculating validation batches...
+Test time is 0.698484
